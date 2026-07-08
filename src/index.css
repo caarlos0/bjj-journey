@@ -257,6 +257,150 @@ input[type='date'] {
   width: auto;
 }
 
+/* ---------- export menu & cards ---------- */
+
+.export-wrap {
+  position: relative;
+}
+
+.export-menu {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+  overflow: hidden;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 10;
+}
+
+.export-menu button {
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 11px 16px;
+  text-align: left;
+}
+
+.export-menu button:hover {
+  background: var(--panel);
+  color: var(--accent);
+}
+
+.offscreen {
+  left: -12000px;
+  position: fixed;
+  top: 0;
+}
+
+.summary-card {
+  align-items: center;
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+  gap: 44px;
+  justify-content: center;
+  padding: 90px;
+}
+
+.summary-belt-strip {
+  border-radius: 10px;
+  display: flex;
+  height: 22px;
+  overflow: hidden;
+  width: 480px;
+}
+
+.summary-belt-strip span {
+  flex: 1;
+}
+
+.summary-title {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 92px;
+  letter-spacing: 6px;
+  line-height: 1.05;
+  margin: 0;
+  text-align: center;
+}
+
+.summary-name {
+  color: var(--accent);
+  font-size: 46px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.summary-duration {
+  color: var(--text-dim);
+  font-size: 32px;
+  letter-spacing: 3px;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.summary-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  justify-content: center;
+  max-width: 860px;
+}
+
+.summary-stats .stat-chip {
+  font-size: 32px;
+  padding: 12px 30px;
+}
+
+.summary-belts {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.summary-belts li {
+  align-items: center;
+  display: flex;
+  gap: 20px;
+}
+
+.summary-belt-dot {
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  height: 30px;
+  width: 30px;
+}
+
+.summary-belt-name {
+  font-size: 34px;
+  font-weight: 700;
+  min-width: 200px;
+}
+
+.summary-belt-date {
+  color: var(--text-dim);
+  font-size: 30px;
+}
+
+.summary-footer {
+  color: var(--text-dim);
+  font-size: 26px;
+  letter-spacing: 3px;
+  margin: 0;
+  text-transform: uppercase;
+}
+
 /* ---------- shared view ---------- */
 
 .shared-banner {

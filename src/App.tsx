@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { toPng } from 'html-to-image'
 import { Backup, type BackupData } from './components/Backup'
 import { EventForm, type PhotoChange } from './components/EventForm'
+import { SummaryCard, type CardFormat } from './components/SummaryCard'
 import { EventList } from './components/EventList'
 import { Timeline } from './components/Timeline'
 import { useI18n, type Lang } from './i18n'
@@ -28,6 +29,9 @@ export default function App() {
   const [editing, setEditing] = useState<TimelineEvent | null>(null)
   const { photoUrls, reloadPhotos } = usePhotos()
   const timelineRef = useRef<HTMLDivElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
+  const [exportMenu, setExportMenu] = useState(false)
+  const [cardFormat, setCardFormat] = useState<CardFormat | null>(null)
 
   useEffect(() => {
     const onHashChange = () => setShared(parseShareHash(location.hash))
@@ -100,7 +104,28 @@ export default function App() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  async function handleExport() {
+  async function deliverPng(dataUrl: string) {
+    // Native share sheet only on mobile: it's how you post to social
+    // apps there. On desktop it's clunky, so download instead.
+    const isMobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent)
+    const blob = await (await fetch(dataUrl)).blob()
+    const file = new File([blob], 'bjj-journey.png', { type: 'image/png' })
+    if (isMobile && navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: t('tl.title') })
+        return
+      } catch (err) {
+        // User cancelled the share sheet: don't force a download.
+        if (err instanceof DOMException && err.name === 'AbortError') return
+      }
+    }
+    const link = document.createElement('a')
+    link.download = 'bjj-journey.png'
+    link.href = dataUrl
+    link.click()
+  }
+
+  async function exportTimeline() {
     const node = timelineRef.current
     if (!node || exporting) return
     setExporting(true)
@@ -109,26 +134,45 @@ export default function App() {
         pixelRatio: 2,
         backgroundColor: '#14161a',
       })
-      // Native share sheet only on mobile: it's how you post to social
-      // apps there. On desktop it's clunky, so download instead.
-      const isMobile = /android|iphone|ipad|ipod/i.test(navigator.userAgent)
-      const blob = await (await fetch(dataUrl)).blob()
-      const file = new File([blob], 'bjjourney.png', { type: 'image/png' })
-      if (isMobile && navigator.canShare?.({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], title: t('tl.title') })
-          return
-        } catch (err) {
-          // User cancelled the share sheet: don't force a download.
-          if (err instanceof DOMException && err.name === 'AbortError') return
-        }
-      }
-      const link = document.createElement('a')
-      link.download = 'bjjourney.png'
-      link.href = dataUrl
-      link.click()
+      await deliverPng(dataUrl)
     } finally {
       setExporting(false)
+    }
+  }
+
+  // The summary card renders off-screen; capture it on the frame after
+  // it mounts.
+  useEffect(() => {
+    if (!cardFormat) return
+    let cancelled = false
+    const run = async () => {
+      await document.fonts.ready
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+      const node = cardRef.current
+      if (node && !cancelled) {
+        const dataUrl = await toPng(node, {
+          pixelRatio: 1,
+          backgroundColor: '#14161a',
+        })
+        await deliverPng(dataUrl)
+      }
+      setCardFormat(null)
+      setExporting(false)
+    }
+    void run()
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cardFormat])
+
+  function pickExport(format: CardFormat | 'full') {
+    setExportMenu(false)
+    if (format === 'full') {
+      void exportTimeline()
+    } else {
+      setExporting(true)
+      setCardFormat(format)
     }
   }
 
@@ -161,16 +205,42 @@ export default function App() {
           >
             {copied ? `✅ ${t('share.copied')}` : `🔗 ${t('share.button')}`}
           </button>
-          <button
-            type="button"
-            className="btn-primary"
-            disabled={viewEvents.length === 0 || exporting}
-            onClick={handleExport}
-          >
-            {exporting ? t('export.sharing') : `📸 ${t('export.button')}`}
-          </button>
+          <div className="export-wrap">
+            <button
+              type="button"
+              className="btn-primary"
+              disabled={viewEvents.length === 0 || exporting}
+              onClick={() => setExportMenu((v) => !v)}
+            >
+              {exporting ? t('export.sharing') : `📸 ${t('export.button')}`}
+            </button>
+            {exportMenu && (
+              <div className="export-menu">
+                <button type="button" onClick={() => pickExport('full')}>
+                  📜 {t('export.full')}
+                </button>
+                <button type="button" onClick={() => pickExport('story')}>
+                  📱 {t('export.story')}
+                </button>
+                <button type="button" onClick={() => pickExport('square')}>
+                  ⬛ {t('export.square')}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
+
+      {cardFormat && (
+        <div className="offscreen" aria-hidden>
+          <SummaryCard
+            ref={cardRef}
+            events={viewEvents}
+            name={viewName}
+            format={cardFormat}
+          />
+        </div>
+      )}
 
       {shared && (
         <div className="shared-banner">

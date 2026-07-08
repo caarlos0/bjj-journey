@@ -1,5 +1,29 @@
 import { sortByDate } from './describe'
+import type { TKey } from './i18n'
 import type { BeltColor, TimelineEvent } from './types'
+
+type T = (key: TKey, vars?: Record<string, string | number>) => string
+
+// "X years on the mats", from the first event to today.
+export function matTime(firstDate: string, t: T): string | null {
+  const [y, m, d] = firstDate.split('-').map(Number)
+  const start = new Date(y, m - 1, d)
+  const now = new Date()
+  let months =
+    (now.getFullYear() - start.getFullYear()) * 12 +
+    (now.getMonth() - start.getMonth())
+  if (now.getDate() < start.getDate()) months--
+  if (months < 1) return null
+  if (months < 12) {
+    return t('tl.trainingFor', {
+      years: months === 1 ? t('tl.month') : t('tl.months', { n: months }),
+    })
+  }
+  const years = Math.floor(months / 12)
+  return t('tl.trainingFor', {
+    years: years === 1 ? t('tl.year') : t('tl.years', { n: years }),
+  })
+}
 
 export interface Stats {
   competitions: number

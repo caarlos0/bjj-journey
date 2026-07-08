@@ -2,32 +2,9 @@ import { forwardRef } from 'react'
 import { beltAt, describeEvent, sortByDate } from '../describe'
 import { useI18n } from '../i18n'
 import { EVENT_ICONS, RESULT_ICONS } from '../icons'
-import { computeStats } from '../stats'
+import { computeStats, matTime } from '../stats'
 import { BELT_STYLES, type TimelineEvent } from '../types'
 import { Belt } from './Belt'
-
-function matTime(
-  firstDate: string,
-  t: ReturnType<typeof useI18n>['t'],
-): string | null {
-  const [y, m, d] = firstDate.split('-').map(Number)
-  const start = new Date(y, m - 1, d)
-  const now = new Date()
-  let months =
-    (now.getFullYear() - start.getFullYear()) * 12 +
-    (now.getMonth() - start.getMonth())
-  if (now.getDate() < start.getDate()) months--
-  if (months < 1) return null
-  if (months < 12) {
-    return t('tl.trainingFor', {
-      years: months === 1 ? t('tl.month') : t('tl.months', { n: months }),
-    })
-  }
-  const years = Math.floor(months / 12)
-  return t('tl.trainingFor', {
-    years: years === 1 ? t('tl.year') : t('tl.years', { n: years }),
-  })
-}
 
 interface TimelineProps {
   events: TimelineEvent[]
