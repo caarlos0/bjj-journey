@@ -125,14 +125,6 @@ export default function App() {
     saveName(active, value)
   }
 
-  function importShared() {
-    if (!shared) return
-    if (events.length > 0 && !confirm(t('shared.confirmReplace'))) return
-    updateEvents(shared.events)
-    handleName(shared.name)
-    closeShared()
-  }
-
   async function restoreBackup(data: BackupData) {
     if (events.length > 0 && !confirm(t('shared.confirmReplace'))) return
     setEditing(null)
@@ -311,33 +303,9 @@ export default function App() {
         <div className="shared-banner">
           <span>👀 {t('shared.banner')}</span>
           <div className="shared-banner-actions">
-            {events.length === 0 ? (
-              <>
-                <button type="button" className="btn-primary" onClick={closeShared}>
-                  🥋 {t('shared.create')}
-                </button>
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  onClick={importShared}
-                >
-                  {t('shared.import')}
-                </button>
-              </>
-            ) : (
-              <>
-                <button type="button" className="btn-primary" onClick={importShared}>
-                  {t('shared.import')}
-                </button>
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  onClick={closeShared}
-                >
-                  {t('shared.close')}
-                </button>
-              </>
-            )}
+            <button type="button" className="btn-primary" onClick={closeShared}>
+              🥋 {t('shared.create')}
+            </button>
           </div>
         </div>
       )}
