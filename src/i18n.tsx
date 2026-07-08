@@ -78,6 +78,7 @@ const dict = {
     'shared.banner': "You're viewing a shared timeline.",
     'shared.import': 'Save to my device',
     'shared.close': 'Close',
+    'shared.create': 'Create my own journey',
     'shared.confirmReplace':
       'This will replace your current timeline. Continue?',
     'ordinal.1': '1st',
@@ -161,6 +162,7 @@ const dict = {
     'shared.banner': 'Você está vendo uma linha do tempo compartilhada.',
     'shared.import': 'Salvar no meu dispositivo',
     'shared.close': 'Fechar',
+    'shared.create': 'Criar minha própria jornada',
     'shared.confirmReplace':
       'Isso vai substituir sua linha do tempo atual. Continuar?',
     'ordinal.1': '1º',

@@ -135,12 +135,33 @@ export default function App() {
         <div className="shared-banner">
           <span>👀 {t('shared.banner')}</span>
           <div className="shared-banner-actions">
-            <button type="button" className="btn-primary" onClick={importShared}>
-              {t('shared.import')}
-            </button>
-            <button type="button" className="btn-secondary" onClick={closeShared}>
-              {t('shared.close')}
-            </button>
+            {events.length === 0 ? (
+              <>
+                <button type="button" className="btn-primary" onClick={closeShared}>
+                  🥋 {t('shared.create')}
+                </button>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={importShared}
+                >
+                  {t('shared.import')}
+                </button>
+              </>
+            ) : (
+              <>
+                <button type="button" className="btn-primary" onClick={importShared}>
+                  {t('shared.import')}
+                </button>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={closeShared}
+                >
+                  {t('shared.close')}
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
