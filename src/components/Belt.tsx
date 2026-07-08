@@ -24,12 +24,18 @@ export function Belt({ color, stripes = 0, width = 120, scale = 1 }: BeltProps) 
       }}
       aria-hidden
     >
-      {style.band && (
-        <div
-          className="belt-band"
-          style={{ backgroundColor: style.band, height: 6 * scale }}
-        />
-      )}
+      {style.band &&
+        (style.bandVertical ? (
+          <div className="belt-vbands">
+            <span style={{ backgroundColor: style.band, width: 16 * scale }} />
+            <span style={{ backgroundColor: style.band, width: 16 * scale }} />
+          </div>
+        ) : (
+          <div
+            className="belt-band"
+            style={{ backgroundColor: style.band, height: 6 * scale }}
+          />
+        ))}
       <div
         className="belt-rankbar"
         style={{

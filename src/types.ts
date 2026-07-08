@@ -49,9 +49,11 @@ export interface TimelineEvent {
 
 export interface BeltStyle {
   base: string
-  // Center band running the length of the belt (kids split belts,
-  // coral and red-white belts).
+  // Accent band over the base color. By default a stripe running the
+  // length of the belt (kids split belts); for the coral-snake adult
+  // belts, bandVertical draws it across the belt instead.
   band?: string
+  bandVertical?: boolean
   // Rank bar and stripe colors, when not the default black bar with
   // white stripes.
   rankBar?: string
@@ -84,8 +86,8 @@ export const BELT_STYLES: Record<BeltColor, BeltStyle> = {
   purple: { base: '#6b3fa0' },
   brown: { base: '#6d4527' },
   black: { base: black, rankBar: red },
-  coral: { base: red, band: black, rankBar: white, stripe: black },
-  'red-white': { base: red, band: white },
+  coral: { base: red, band: black, bandVertical: true, rankBar: white, stripe: black },
+  'red-white': { base: red, band: white, bandVertical: true },
   red: { base: red },
 }
 

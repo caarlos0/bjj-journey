@@ -828,6 +828,12 @@ input[type='date'] {
   transform: translateY(-50%);
 }
 
+.belt-vbands {
+  display: flex;
+  flex: 1;
+  justify-content: space-evenly;
+}
+
 .belt-rankbar {
   align-items: center;
   display: flex;
