@@ -70,6 +70,8 @@ const dict = {
     'tl.wins': '{n} wins',
     'tl.win': '1 win',
     'tl.empty': 'Your timeline will show up here.\nAdd events on the left to begin.',
+    'stats.competitions': '{n} competitions',
+    'stats.competition': '1 competition',
     'tl.trainingFor': '{years} on the mats',
     'tl.year': '1 year',
     'tl.years': '{n} years',
@@ -167,6 +169,8 @@ const dict = {
     'tl.win': '1 vitória',
     'tl.empty':
       'Sua linha do tempo vai aparecer aqui.\nAdicione eventos à esquerda para começar.',
+    'stats.competitions': '{n} campeonatos',
+    'stats.competition': '1 campeonato',
     'tl.trainingFor': '{years} de tatame',
     'tl.year': '1 ano',
     'tl.years': '{n} anos',

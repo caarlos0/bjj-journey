@@ -2,6 +2,7 @@ import { forwardRef } from 'react'
 import { beltAt, describeEvent, sortByDate } from '../describe'
 import { useI18n } from '../i18n'
 import { EVENT_ICONS, RESULT_ICONS } from '../icons'
+import { computeStats } from '../stats'
 import { BELT_STYLES, type TimelineEvent } from '../types'
 import { Belt } from './Belt'
 
@@ -51,6 +52,7 @@ export const Timeline = forwardRef<HTMLDivElement, TimelineProps>(
     }
 
     const duration = matTime(sorted[0].date, t)
+    const stats = computeStats(sorted)
 
     return (
       <div className="timeline-card" ref={ref}>
@@ -63,6 +65,35 @@ export const Timeline = forwardRef<HTMLDivElement, TimelineProps>(
           <h2>{t('tl.title')}</h2>
           {name && <p className="timeline-name">{name}</p>}
           {duration && <p className="timeline-duration">{duration}</p>}
+          <div className="timeline-current-belt">
+            <Belt
+              color={stats.currentBelt}
+              stripes={stats.currentStripes}
+              width={160}
+            />
+          </div>
+          {stats.competitions > 0 && (
+            <div className="timeline-stats">
+              <span className="stat-chip">
+                🏆{' '}
+                {stats.competitions === 1
+                  ? t('stats.competition')
+                  : t('stats.competitions', { n: stats.competitions })}
+              </span>
+              {stats.gold > 0 && <span className="stat-chip">🥇 {stats.gold}</span>}
+              {stats.silver > 0 && (
+                <span className="stat-chip">🥈 {stats.silver}</span>
+              )}
+              {stats.bronze > 0 && (
+                <span className="stat-chip">🥉 {stats.bronze}</span>
+              )}
+              {stats.wins > 0 && (
+                <span className="stat-chip">
+                  ✊ {stats.wins === 1 ? t('tl.win') : t('tl.wins', { n: stats.wins })}
+                </span>
+              )}
+            </div>
+          )}
         </header>
 
         <ol className="timeline">

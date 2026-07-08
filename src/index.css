@@ -447,6 +447,29 @@ input[type='date'] {
   letter-spacing: 1px;
 }
 
+.timeline-current-belt {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.timeline-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.stat-chip {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 12px;
+}
+
 .timeline {
   list-style: none;
   margin: 0;
