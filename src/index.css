@@ -523,6 +523,26 @@ input[type='date'] {
   text-decoration: underline;
 }
 
+.app-footer p {
+  margin: 0 0 10px;
+}
+
+.btn-install {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 7px 14px;
+  transition: border-color 0.15s;
+}
+
+.btn-install:hover {
+  border-color: var(--accent);
+}
+
 /* ---------- belt graphic ---------- */
 
 .belt {

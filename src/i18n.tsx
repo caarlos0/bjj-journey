@@ -75,6 +75,9 @@ const dict = {
     'export.footer': 'made with BJJ Journey',
     'footer.by': 'made by',
     'footer.source': 'source code',
+    'install.button': 'Add to home screen',
+    'install.iosHint':
+      'In Safari, tap the Share button and then "Add to Home Screen".',
     'share.button': 'Share link',
     'share.copied': 'Link copied!',
     'shared.banner': "You're viewing a shared timeline.",
@@ -161,6 +164,9 @@ const dict = {
     'export.footer': 'feito com BJJ Journey',
     'footer.by': 'feito por',
     'footer.source': 'código fonte',
+    'install.button': 'Adicionar à tela inicial',
+    'install.iosHint':
+      'No Safari, toque no botão Compartilhar e depois em "Adicionar à Tela de Início".',
     'share.button': 'Copiar link',
     'share.copied': 'Link copiado!',
     'shared.banner': 'Você está vendo uma linha do tempo compartilhada.',
