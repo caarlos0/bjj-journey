@@ -18,6 +18,24 @@ export function today(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
+// True at each index for a 'start' that resumes training after a break,
+// so it reads as a "restart" rather than the first start.
+export function restartFlags(sorted: TimelineEvent[]): boolean[] {
+  let paused = false
+  return sorted.map((e) => {
+    if (e.type === 'break') {
+      paused = true
+      return false
+    }
+    if (e.type === 'start') {
+      const resumed = paused
+      paused = false
+      return resumed
+    }
+    return false
+  })
+}
+
 // Belt in effect on a given date, considering only belt events dated on
 // or before it.
 export function beltAtDate(events: TimelineEvent[], date: string): BeltColor {
@@ -32,9 +50,15 @@ export function describeEvent(
   event: TimelineEvent,
   currentBelt: BeltColor,
   t: T,
+  isRestart = false,
 ): string {
   switch (event.type) {
     case 'start':
+      if (isRestart) {
+        return event.school
+          ? t('tl.restart', { school: event.school })
+          : t('tl.restartNoSchool')
+      }
       return event.school
         ? t('tl.start', { school: event.school })
         : t('tl.startNoSchool')
@@ -53,6 +77,8 @@ export function describeEvent(
       return event.competitionName || t('type.competition')
     case 'injury':
       return t('type.injury')
+    case 'break':
+      return t('tl.break')
     case 'seminar':
       return event.instructor
         ? t('tl.seminar', { name: event.instructor })

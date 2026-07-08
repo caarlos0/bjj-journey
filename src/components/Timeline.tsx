@@ -1,5 +1,5 @@
 import { forwardRef, useMemo } from 'react'
-import { beltsThrough, describeEvent, sortByDate } from '../describe'
+import { beltsThrough, describeEvent, restartFlags, sortByDate } from '../describe'
 import { useI18n } from '../i18n'
 import { EVENT_ICONS, RESULT_ICONS } from '../icons'
 import { computeStats, formatWins, matTime } from '../stats'
@@ -19,6 +19,7 @@ export const Timeline = forwardRef<HTMLDivElement, TimelineProps>(
     const { t, formatDate } = useI18n()
     const sorted = useMemo(() => sortByDate(events), [events])
     const belts = useMemo(() => beltsThrough(sorted), [sorted])
+    const restarts = useMemo(() => restartFlags(sorted), [sorted])
     const stats = useMemo(() => computeStats(sorted), [sorted])
 
     if (sorted.length === 0) {
@@ -33,7 +34,7 @@ export const Timeline = forwardRef<HTMLDivElement, TimelineProps>(
       )
     }
 
-    const duration = matTime(sorted[0].date, t)
+    const duration = matTime(sorted, t)
 
     return (
       <div className="timeline-card" ref={ref}>
@@ -73,7 +74,7 @@ export const Timeline = forwardRef<HTMLDivElement, TimelineProps>(
                         ? RESULT_ICONS[event.result]
                         : EVENT_ICONS[event.type]}
                     </span>
-                    {describeEvent(event, belt, t)}
+                    {describeEvent(event, belt, t, restarts[i])}
                   </p>
                   {event.type === 'belt' && event.belt && (
                     <Belt color={event.belt} />

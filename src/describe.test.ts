@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { beltAtDate, beltsThrough, describeEvent, sortByDate } from './describe'
+import {
+  beltAtDate,
+  beltsThrough,
+  describeEvent,
+  restartFlags,
+  sortByDate,
+} from './describe'
 import type { TKey } from './i18n'
 import type { TimelineEvent } from './types'
 
@@ -90,5 +96,37 @@ describe('describeEvent', () => {
     expect(
       describeEvent(ev({ type: 'competition', competitionName: 'Worlds' }), 'white', t),
     ).toBe('Worlds')
+  })
+
+  it('labels a start after a break as a restart', () => {
+    expect(
+      describeEvent(ev({ type: 'start', school: 'Alliance' }), 'blue', t, true),
+    ).toBe('tl.restart[Alliance]')
+    expect(describeEvent(ev({ type: 'start' }), 'blue', t, true)).toBe(
+      'tl.restartNoSchool',
+    )
+  })
+
+  it('describes a break', () => {
+    expect(describeEvent(ev({ type: 'break' }), 'blue', t)).toBe('tl.break')
+  })
+})
+
+describe('restartFlags', () => {
+  it('flags a start that resumes after a break', () => {
+    const sorted = sortByDate([
+      ev({ type: 'start', date: '2015-01-01' }),
+      ev({ type: 'break', date: '2018-01-01' }),
+      ev({ type: 'start', date: '2020-01-01' }),
+    ])
+    expect(restartFlags(sorted)).toEqual([false, false, true])
+  })
+
+  it('never flags the first start or starts with no preceding break', () => {
+    const sorted = sortByDate([
+      ev({ type: 'start', date: '2015-01-01' }),
+      ev({ type: 'start', date: '2016-01-01' }),
+    ])
+    expect(restartFlags(sorted)).toEqual([false, false])
   })
 })

@@ -27,6 +27,7 @@ export type EventType =
   | 'belt'
   | 'competition'
   | 'injury'
+  | 'break'
   | 'seminar'
   | 'milestone'
 

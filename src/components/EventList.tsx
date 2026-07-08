@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { beltsThrough, describeEvent, sortByDate } from '../describe'
+import { beltsThrough, describeEvent, restartFlags, sortByDate } from '../describe'
 import { useI18n } from '../i18n'
 import { EVENT_ICONS } from '../icons'
 import type { TimelineEvent } from '../types'
@@ -15,6 +15,7 @@ export function EventList({ events, editingId, onEdit, onDelete }: EventListProp
   const { t, formatDate } = useI18n()
   const sorted = useMemo(() => sortByDate(events), [events])
   const belts = useMemo(() => beltsThrough(sorted), [sorted])
+  const restarts = useMemo(() => restartFlags(sorted), [sorted])
 
   if (sorted.length === 0) {
     return <p className="event-list-empty">{t('panel.noEvents')}</p>
@@ -32,7 +33,7 @@ export function EventList({ events, editingId, onEdit, onDelete }: EventListProp
           </span>
           <div className="event-list-body">
             <span className="event-list-text">
-              {describeEvent(event, belts[i], t)}
+              {describeEvent(event, belts[i], t, restarts[i])}
             </span>
             <span className="event-list-date">{formatDate(event.date)}</span>
           </div>

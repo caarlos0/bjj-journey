@@ -1,18 +1,36 @@
-import { sortByDate } from './describe'
+import { sortByDate, today } from './describe'
 import type { TKey } from './i18n'
 import type { BeltColor, TimelineEvent } from './types'
 
 type T = (key: TKey, vars?: Record<string, string | number>) => string
 
-// "X years on the mats", from the first event to today.
-export function matTime(firstDate: string, t: T): string | null {
-  const [y, m, d] = firstDate.split('-').map(Number)
-  const start = new Date(y, m - 1, d)
-  const now = new Date()
-  let months =
-    (now.getFullYear() - start.getFullYear()) * 12 +
-    (now.getMonth() - start.getMonth())
-  if (now.getDate() < start.getDate()) months--
+// Whole months between two ISO dates (yyyy-mm-dd), never negative.
+function monthsBetween(from: string, to: string): number {
+  const [y1, m1, d1] = from.split('-').map(Number)
+  const [y2, m2, d2] = to.split('-').map(Number)
+  let months = (y2 - y1) * 12 + (m2 - m1)
+  if (d2 < d1) months--
+  return Math.max(0, months)
+}
+
+// "X years on the mats": from the first event to today, minus every
+// break→restart gap, so time spent off the mats doesn't count.
+export function matTime(events: TimelineEvent[], t: T): string | null {
+  const sorted = sortByDate(events)
+  if (sorted.length === 0) return null
+  let activeSince: string | null = sorted[0].date
+  let months = 0
+  for (const e of sorted) {
+    if (e.type === 'break') {
+      if (activeSince) {
+        months += monthsBetween(activeSince, e.date)
+        activeSince = null
+      }
+    } else if (e.type === 'start' && !activeSince) {
+      activeSince = e.date
+    }
+  }
+  if (activeSince) months += monthsBetween(activeSince, today())
   if (months < 1) return null
   if (months < 12) {
     return t('tl.trainingFor', {

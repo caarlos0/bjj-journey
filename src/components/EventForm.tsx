@@ -20,6 +20,7 @@ const EVENT_TYPES: EventType[] = [
   'competition',
   'seminar',
   'injury',
+  'break',
   'milestone',
 ]
 const RESULTS: CompetitionResult[] = ['gold', 'silver', 'bronze', 'participated']

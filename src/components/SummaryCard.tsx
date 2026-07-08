@@ -22,7 +22,7 @@ export const SummaryCard = forwardRef<HTMLDivElement, SummaryCardProps>(
     const { t, formatDate } = useI18n()
     const sorted = sortByDate(events)
     const stats = computeStats(sorted)
-    const duration = sorted.length ? matTime(sorted[0].date, t) : null
+    const duration = matTime(sorted, t)
     const beltHistory = sorted.filter((e) => e.type === 'belt' && e.belt)
     const maxBelts = format === 'story' ? 8 : 4
 

@@ -7,6 +7,7 @@ export const EVENT_ICONS: Record<EventType, string> = {
   belt: '🥇',
   competition: '🏆',
   injury: '🤕',
+  break: '⏸️',
   seminar: '🎓',
   milestone: '⭐',
 }
