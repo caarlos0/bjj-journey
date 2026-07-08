@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
 
 export type Lang = 'en-US' | 'pt-BR'
 
@@ -277,11 +283,15 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     return text
   }
 
+  // Intl formatters are expensive to construct; build one per language.
+  const dateFormatter = useMemo(
+    () => new Intl.DateTimeFormat(lang, { dateStyle: 'medium' }),
+    [lang],
+  )
+
   const formatDate = (iso: string) => {
     const [y, m, d] = iso.split('-').map(Number)
-    return new Intl.DateTimeFormat(lang, { dateStyle: 'medium' }).format(
-      new Date(y, m - 1, d),
-    )
+    return dateFormatter.format(new Date(y, m - 1, d))
   }
 
   return (

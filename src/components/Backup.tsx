@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { today } from '../describe'
 import { useI18n } from '../i18n'
 import { blobToDataUrl, getAllPhotos } from '../photos'
 import type { TimelineEvent } from '../types'
@@ -34,7 +35,7 @@ export function Backup({ name, events, onRestore }: BackupProps) {
     )
     const blob = new Blob([payload], { type: 'application/json' })
     const link = document.createElement('a')
-    link.download = `bjj-journey-backup-${new Date().toISOString().slice(0, 10)}.json`
+    link.download = `bjj-journey-backup-${today()}.json`
     link.href = URL.createObjectURL(blob)
     link.click()
     URL.revokeObjectURL(link.href)

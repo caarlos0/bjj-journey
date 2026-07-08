@@ -25,6 +25,10 @@ export function matTime(firstDate: string, t: T): string | null {
   })
 }
 
+export function formatWins(wins: number, t: T): string {
+  return wins === 1 ? t('tl.win') : t('tl.wins', { n: wins })
+}
+
 export interface Stats {
   competitions: number
   gold: number

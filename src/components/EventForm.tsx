@@ -1,10 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { beltAtDate } from '../describe'
+import { beltAtDate, today } from '../describe'
 import { useI18n } from '../i18n'
 import { EVENT_ICONS, RESULT_ICONS } from '../icons'
 import {
   ADULT_BELTS,
   KIDS_BELTS,
+  maxStripes,
   type BeltColor,
   type CompetitionResult,
   type EventType,
@@ -22,10 +23,6 @@ const EVENT_TYPES: EventType[] = [
   'milestone',
 ]
 const RESULTS: CompetitionResult[] = ['gold', 'silver', 'bronze', 'participated']
-
-function today(): string {
-  return new Date().toISOString().slice(0, 10)
-}
 
 export type PhotoChange = File | 'remove' | null
 
@@ -74,10 +71,7 @@ export function EventForm({
     setPhoto(null)
   }, [editing])
 
-  // Black belts take up to 6 degrees before coral; colored belts cap at
-  // 4 stripes.
-  const onBlackBelt = beltAtDate(events, date) === 'black'
-  const maxStripes = onBlackBelt ? 6 : 4
+  const stripeMax = maxStripes(beltAtDate(events, date))
 
   function reset() {
     setNotes('')
@@ -97,7 +91,7 @@ export function EventForm({
     }
     if (type === 'start' || type === 'school') event.school = school.trim() || undefined
     if (type === 'belt') event.belt = belt
-    if (type === 'stripe') event.stripe = Math.min(stripe, maxStripes)
+    if (type === 'stripe') event.stripe = Math.min(stripe, stripeMax)
     if (type === 'competition') {
       event.competitionName = competitionName.trim() || undefined
       event.result = result
@@ -181,10 +175,10 @@ export function EventForm({
         <label className="field">
           <span>{t('form.stripe')}</span>
           <select
-            value={Math.min(stripe, maxStripes)}
+            value={Math.min(stripe, stripeMax)}
             onChange={(e) => setStripe(Number(e.target.value))}
           >
-            {Array.from({ length: maxStripes }, (_, i) => i + 1).map((n) => (
+            {Array.from({ length: stripeMax }, (_, i) => i + 1).map((n) => (
               <option key={n} value={n}>
                 {t(`ordinal.${n}` as 'ordinal.1')}
               </option>

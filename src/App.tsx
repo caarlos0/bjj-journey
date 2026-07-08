@@ -79,14 +79,13 @@ export default function App() {
 
   function deleteProfile() {
     if (!confirm(t('profile.confirmDelete'))) return
-    for (const e of events) void deletePhoto(e.id)
+    void Promise.all(events.map((e) => deletePhoto(e.id))).then(reloadPhotos)
     removeProfileData(active)
     let next = profiles.filter((id) => id !== active)
     if (next.length === 0) next = [crypto.randomUUID()]
     setProfiles(next)
     saveProfiles(next)
     switchProfile(next[0])
-    void reloadPhotos()
   }
 
   async function saveEvent(event: TimelineEvent, photo: PhotoChange) {

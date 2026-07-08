@@ -13,8 +13,6 @@ interface BeltProps {
 // social export cards.
 export function Belt({ color, stripes = 0, width = 120, scale = 1 }: BeltProps) {
   const style = BELT_STYLES[color]
-  const rankBarColor =
-    color === 'black' ? '#a01916' : color === 'coral' ? '#f4f1ea' : '#1a1a1a'
   return (
     <div
       className="belt"
@@ -35,7 +33,7 @@ export function Belt({ color, stripes = 0, width = 120, scale = 1 }: BeltProps) 
       <div
         className="belt-rankbar"
         style={{
-          backgroundColor: rankBarColor,
+          backgroundColor: style.rankBar ?? '#1a1a1a',
           // Wide enough for the stripes plus padding, never narrower
           // than the classic empty rank bar.
           width: Math.max(34, 7 * Math.min(stripes, 6) + 7) * scale,
@@ -50,7 +48,7 @@ export function Belt({ color, stripes = 0, width = 120, scale = 1 }: BeltProps) 
             style={{
               width: 4 * scale,
               marginLeft: i === 0 ? 0 : 3 * scale,
-              ...(color === 'coral' ? { backgroundColor: '#1a1a1a' } : {}),
+              ...(style.stripe ? { backgroundColor: style.stripe } : {}),
             }}
           />
         ))}

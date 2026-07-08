@@ -3,19 +3,19 @@ import type { BeltColor, TimelineEvent } from './types'
 
 type T = (key: TKey, vars?: Record<string, string | number>) => string
 
-// Walks events in date order tracking the current belt, so stripe
-// events can say which belt they landed on and timeline dots can be
-// painted with the belt of that moment.
-export function beltAt(
-  events: TimelineEvent[],
-  index: number,
-): BeltColor {
+// Belt in effect at each index of a date-sorted event list, in a
+// single pass — so stripe events can say which belt they landed on and
+// timeline dots can be painted with the belt of that moment.
+export function beltsThrough(sorted: TimelineEvent[]): BeltColor[] {
   let belt: BeltColor = 'white'
-  for (let i = 0; i <= index; i++) {
-    const e = events[i]
+  return sorted.map((e) => {
     if (e.type === 'belt' && e.belt) belt = e.belt
-  }
-  return belt
+    return belt
+  })
+}
+
+export function today(): string {
+  return new Date().toISOString().slice(0, 10)
 }
 
 // Belt in effect on a given date, considering only belt events dated on

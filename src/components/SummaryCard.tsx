@@ -4,6 +4,8 @@ import { useI18n } from '../i18n'
 import { computeStats, matTime } from '../stats'
 import { BELT_STYLES, type TimelineEvent } from '../types'
 import { Belt } from './Belt'
+import { BeltStrip } from './BeltStrip'
+import { StatChips } from './StatChips'
 
 export type CardFormat = 'story' | 'square'
 
@@ -35,11 +37,7 @@ export const SummaryCard = forwardRef<HTMLDivElement, SummaryCardProps>(
         style={{ width: 1080, height: format === 'story' ? 1920 : 1080 }}
       >
         <div className="summary-inner">
-          <div className="summary-belt-strip" aria-hidden>
-            {(['white', 'blue', 'purple', 'brown', 'black'] as const).map((b) => (
-              <span key={b} style={{ backgroundColor: BELT_STYLES[b].base }} />
-            ))}
-          </div>
+          <BeltStrip className="summary-belt-strip" />
 
           <h2 className="summary-title">
             {t('tl.titleBreak')
@@ -62,29 +60,7 @@ export const SummaryCard = forwardRef<HTMLDivElement, SummaryCardProps>(
             />
           </div>
 
-          {stats.competitions > 0 && (
-            <div className="summary-stats">
-              <span className="stat-chip">
-                🏆{' '}
-                {stats.competitions === 1
-                  ? t('stats.competition')
-                  : t('stats.competitions', { n: stats.competitions })}
-              </span>
-              {stats.gold > 0 && <span className="stat-chip">🥇 {stats.gold}</span>}
-              {stats.silver > 0 && (
-                <span className="stat-chip">🥈 {stats.silver}</span>
-              )}
-              {stats.bronze > 0 && (
-                <span className="stat-chip">🥉 {stats.bronze}</span>
-              )}
-              {stats.wins > 0 && (
-                <span className="stat-chip">
-                  ✊{' '}
-                  {stats.wins === 1 ? t('tl.win') : t('tl.wins', { n: stats.wins })}
-                </span>
-              )}
-            </div>
-          )}
+          <StatChips stats={stats} className="summary-stats" />
 
           {beltHistory.length > 0 && (
             <ul className="summary-belts">

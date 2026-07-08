@@ -52,6 +52,10 @@ export interface BeltStyle {
   // Center band running the length of the belt (kids split belts,
   // coral and red-white belts).
   band?: string
+  // Rank bar and stripe colors, when not the default black bar with
+  // white stripes.
+  rankBar?: string
+  stripe?: string
 }
 
 const grey = '#8a8d90'
@@ -79,8 +83,8 @@ export const BELT_STYLES: Record<BeltColor, BeltStyle> = {
   blue: { base: '#1e5aa8' },
   purple: { base: '#6b3fa0' },
   brown: { base: '#6d4527' },
-  black: { base: black },
-  coral: { base: red, band: black },
+  black: { base: black, rankBar: red },
+  coral: { base: red, band: black, rankBar: white, stripe: black },
   'red-white': { base: red, band: white },
   red: { base: red },
 }
@@ -100,6 +104,12 @@ export const KIDS_BELTS: BeltColor[] = [
   'green',
   'green-black',
 ]
+
+// Colored belts take up to 4 stripes; black belts up to 6 degrees
+// before coral.
+export function maxStripes(belt: BeltColor): number {
+  return belt === 'black' ? 6 : 4
+}
 
 export const ADULT_BELTS: BeltColor[] = [
   'white',

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { beltAt, beltAtDate, describeEvent, sortByDate } from './describe'
+import { beltAtDate, beltsThrough, describeEvent, sortByDate } from './describe'
 import type { TKey } from './i18n'
 import type { TimelineEvent } from './types'
 
@@ -30,7 +30,7 @@ describe('sortByDate', () => {
   })
 })
 
-describe('beltAt', () => {
+describe('beltsThrough', () => {
   const events = sortByDate([
     ev({ id: 'start', type: 'start', date: '2019-01-01' }),
     ev({ id: 'blue', type: 'belt', belt: 'blue', date: '2021-01-01' }),
@@ -38,14 +38,12 @@ describe('beltAt', () => {
     ev({ id: 'purple', type: 'belt', belt: 'purple', date: '2024-01-01' }),
   ])
 
-  it('defaults to white before any promotion', () => {
-    expect(beltAt(events, 0)).toBe('white')
+  it('tracks the belt at each index, defaulting to white', () => {
+    expect(beltsThrough(events)).toEqual(['white', 'blue', 'blue', 'purple'])
   })
 
-  it('tracks the belt at each index', () => {
-    expect(beltAt(events, 1)).toBe('blue')
-    expect(beltAt(events, 2)).toBe('blue')
-    expect(beltAt(events, 3)).toBe('purple')
+  it('returns an empty array for no events', () => {
+    expect(beltsThrough([])).toEqual([])
   })
 })
 
