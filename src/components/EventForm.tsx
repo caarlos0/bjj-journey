@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useI18n } from '../i18n'
 import { EVENT_ICONS, RESULT_ICONS } from '../icons'
 import {
@@ -18,10 +18,12 @@ function today(): string {
 }
 
 interface EventFormProps {
-  onAdd: (event: TimelineEvent) => void
+  onSave: (event: TimelineEvent) => void
+  editing: TimelineEvent | null
+  onCancelEdit: () => void
 }
 
-export function EventForm({ onAdd }: EventFormProps) {
+export function EventForm({ onSave, editing, onCancelEdit }: EventFormProps) {
   const { t } = useI18n()
   const [type, setType] = useState<EventType>('start')
   const [date, setDate] = useState(today())
@@ -33,10 +35,28 @@ export function EventForm({ onAdd }: EventFormProps) {
   const [wins, setWins] = useState(0)
   const [notes, setNotes] = useState('')
 
+  useEffect(() => {
+    if (!editing) return
+    setType(editing.type)
+    setDate(editing.date)
+    setSchool(editing.school ?? '')
+    setBelt(editing.belt ?? 'blue')
+    setStripe(editing.stripe ?? 1)
+    setCompetitionName(editing.competitionName ?? '')
+    setResult(editing.result ?? 'gold')
+    setWins(editing.wins ?? 0)
+    setNotes(editing.notes ?? '')
+  }, [editing])
+
+  function reset() {
+    setNotes('')
+    setCompetitionName('')
+  }
+
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
     const event: TimelineEvent = {
-      id: crypto.randomUUID(),
+      id: editing?.id ?? crypto.randomUUID(),
       type,
       date,
       notes: notes.trim() || undefined,
@@ -49,9 +69,8 @@ export function EventForm({ onAdd }: EventFormProps) {
       event.result = result
       event.wins = wins > 0 ? wins : undefined
     }
-    onAdd(event)
-    setNotes('')
-    setCompetitionName('')
+    onSave(event)
+    reset()
   }
 
   return (
@@ -181,8 +200,13 @@ export function EventForm({ onAdd }: EventFormProps) {
       </label>
 
       <button type="submit" className="btn-primary">
-        {t('form.save')}
+        {editing ? t('form.update') : t('form.save')}
       </button>
+      {editing && (
+        <button type="button" className="btn-secondary btn-cancel" onClick={onCancelEdit}>
+          {t('form.cancel')}
+        </button>
+      )}
     </form>
   )
 }

@@ -22,6 +22,7 @@ export default function App() {
   const [shared, setShared] = useState<SharedData | null>(() =>
     parseShareHash(location.hash),
   )
+  const [editing, setEditing] = useState<TimelineEvent | null>(null)
   const timelineRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -36,6 +37,20 @@ export default function App() {
   function updateEvents(next: TimelineEvent[]) {
     setEvents(next)
     saveEvents(next)
+  }
+
+  function saveEvent(event: TimelineEvent) {
+    if (editing) {
+      updateEvents(events.map((e) => (e.id === event.id ? event : e)))
+      setEditing(null)
+    } else {
+      updateEvents([...events, event])
+    }
+  }
+
+  function startEdit(event: TimelineEvent) {
+    setEditing(event)
+    document.querySelector('.event-form')?.scrollIntoView({ behavior: 'smooth' })
   }
 
   function handleName(value: string) {
@@ -184,12 +199,21 @@ export default function App() {
             </label>
 
             <h2 className="panel-title">{t('panel.addEvent')}</h2>
-            <EventForm onAdd={(event) => updateEvents([...events, event])} />
+            <EventForm
+              onSave={saveEvent}
+              editing={editing}
+              onCancelEdit={() => setEditing(null)}
+            />
 
             <h2 className="panel-title">{t('panel.events')}</h2>
             <EventList
               events={events}
-              onDelete={(id) => updateEvents(events.filter((e) => e.id !== id))}
+              editingId={editing?.id}
+              onEdit={startEdit}
+              onDelete={(id) => {
+                if (editing?.id === id) setEditing(null)
+                updateEvents(events.filter((e) => e.id !== id))
+              }}
             />
           </aside>
         )}

@@ -5,10 +5,12 @@ import type { TimelineEvent } from '../types'
 
 interface EventListProps {
   events: TimelineEvent[]
+  editingId?: string
+  onEdit: (event: TimelineEvent) => void
   onDelete: (id: string) => void
 }
 
-export function EventList({ events, onDelete }: EventListProps) {
+export function EventList({ events, editingId, onEdit, onDelete }: EventListProps) {
   const { t, formatDate } = useI18n()
   const sorted = sortByDate(events)
 
@@ -19,7 +21,10 @@ export function EventList({ events, onDelete }: EventListProps) {
   return (
     <ul className="event-list">
       {sorted.map((event, i) => (
-        <li key={event.id} className="event-list-item">
+        <li
+          key={event.id}
+          className={`event-list-item ${event.id === editingId ? 'editing' : ''}`}
+        >
           <span className="event-list-icon" aria-hidden>
             {EVENT_ICONS[event.type]}
           </span>
@@ -29,6 +34,15 @@ export function EventList({ events, onDelete }: EventListProps) {
             </span>
             <span className="event-list-date">{formatDate(event.date)}</span>
           </div>
+          <button
+            type="button"
+            className="btn-edit"
+            aria-label={t('form.edit')}
+            title={t('form.edit')}
+            onClick={() => onEdit(event)}
+          >
+            ✎
+          </button>
           <button
             type="button"
             className="btn-delete"

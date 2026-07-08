@@ -340,7 +340,8 @@ input[type='date'] {
   font-style: italic;
 }
 
-.btn-delete {
+.btn-delete,
+.btn-edit {
   background: none;
   border: none;
   border-radius: 6px;
@@ -354,6 +355,24 @@ input[type='date'] {
 .btn-delete:hover {
   background: var(--accent-2);
   color: #fff;
+}
+
+.btn-edit {
+  font-size: 14px;
+}
+
+.btn-edit:hover {
+  background: var(--panel);
+  color: var(--accent);
+}
+
+.event-list-item.editing {
+  border-color: var(--accent);
+}
+
+.btn-cancel {
+  margin-top: 8px;
+  width: 100%;
 }
 
 /* ---------- timeline ---------- */
