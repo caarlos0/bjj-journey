@@ -4,7 +4,7 @@ export type Lang = 'en-US' | 'pt-BR'
 
 const dict = {
   'en-US': {
-    'app.title': 'BJJourney',
+    'app.title': 'BJJ Journey',
     'app.tagline': 'Your jiu-jitsu story, one roll at a time',
     'panel.yourName': 'Your name',
     'panel.yourNamePlaceholder': 'e.g. Carlos Gracie',
@@ -56,7 +56,7 @@ const dict = {
     'result.silver': 'Silver',
     'result.bronze': 'Bronze',
     'result.participated': 'Competed',
-    'tl.title': 'My BJJ Journey',
+    'tl.title': 'My Brazilian Jiu Jitsu Journey',
     'tl.start': 'Started training at {school}',
     'tl.startNoSchool': 'Started training jiu-jitsu',
     'tl.school': 'Joined {school}',
@@ -72,7 +72,7 @@ const dict = {
     'tl.months': '{n} months',
     'export.button': 'Export image',
     'export.sharing': 'Rendering…',
-    'export.footer': 'made with bjjourney',
+    'export.footer': 'made with BJJ Journey',
     'share.button': 'Share link',
     'share.copied': 'Link copied!',
     'shared.banner': "You're viewing a shared timeline.",
@@ -87,7 +87,7 @@ const dict = {
     'ordinal.4': '4th',
   },
   'pt-BR': {
-    'app.title': 'BJJourney',
+    'app.title': 'BJJ Journey',
     'app.tagline': 'Sua história no jiu-jitsu, um rola de cada vez',
     'panel.yourName': 'Seu nome',
     'panel.yourNamePlaceholder': 'ex. Carlos Gracie',
@@ -139,7 +139,7 @@ const dict = {
     'result.silver': 'Prata',
     'result.bronze': 'Bronze',
     'result.participated': 'Competiu',
-    'tl.title': 'Minha Jornada no BJJ',
+    'tl.title': 'Minha Jornada no Jiu-Jitsu',
     'tl.start': 'Comecei a treinar na {school}',
     'tl.startNoSchool': 'Comecei a treinar jiu-jitsu',
     'tl.school': 'Entrei na {school}',
@@ -156,7 +156,7 @@ const dict = {
     'tl.months': '{n} meses',
     'export.button': 'Exportar imagem',
     'export.sharing': 'Gerando…',
-    'export.footer': 'feito com bjjourney',
+    'export.footer': 'feito com BJJ Journey',
     'share.button': 'Copiar link',
     'share.copied': 'Link copiado!',
     'shared.banner': 'Você está vendo uma linha do tempo compartilhada.',
@@ -188,7 +188,7 @@ const LANG_KEY = 'bjjourney:lang'
 function detectLang(): Lang {
   const saved = localStorage.getItem(LANG_KEY)
   if (saved === 'en-US' || saved === 'pt-BR') return saved
-  return navigator.language.toLowerCase().startsWith('pt') ? 'pt-BR' : 'en-US'
+  return 'pt-BR'
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {

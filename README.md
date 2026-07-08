@@ -1,4 +1,4 @@
-# BJJourney 🥋
+# BJJ Journey 🥋
 
 Track your Brazilian Jiu-Jitsu journey and share it: when you started
 training, your schools, stripes, belt promotions, and competition results —
@@ -20,7 +20,7 @@ backend and nothing leaves your machine.
 - Share a link: the entire timeline is compressed into the URL hash
   (lz-string), so anyone opening it sees your journey — still no backend.
   Visitors can save a shared timeline to their own device.
-- English (en-US) and Portuguese (pt-BR), auto-detected from the browser.
+- Portuguese (pt-BR, default) and English (en-US).
 
 ## Development
 

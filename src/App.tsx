@@ -99,7 +99,11 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <div className="app-title">
-          <h1>{t('app.title')}</h1>
+          <h1>
+            <span className="brand-green">B</span>
+            <span className="brand-yellow">J</span>
+            <span className="brand-blue">J</span> Journey
+          </h1>
           <p>{t('app.tagline')}</p>
         </div>
         <div className="app-actions">

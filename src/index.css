@@ -68,8 +68,17 @@ body {
   color: var(--text);
 }
 
-.app-title h1::first-letter {
-  color: var(--accent);
+/* Brazilian flag colors, brightened for the dark background */
+.brand-green {
+  color: #35b558;
+}
+
+.brand-yellow {
+  color: #ffd23f;
+}
+
+.brand-blue {
+  color: #4d8bf5;
 }
 
 .app-title p {
