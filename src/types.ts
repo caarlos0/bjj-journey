@@ -20,7 +20,15 @@ export type BeltColor =
   | 'red-white'
   | 'red'
 
-export type EventType = 'start' | 'school' | 'stripe' | 'belt' | 'competition'
+export type EventType =
+  | 'start'
+  | 'school'
+  | 'stripe'
+  | 'belt'
+  | 'competition'
+  | 'injury'
+  | 'seminar'
+  | 'milestone'
 
 export type CompetitionResult = 'gold' | 'silver' | 'bronze' | 'participated'
 
@@ -34,6 +42,8 @@ export interface TimelineEvent {
   competitionName?: string
   result?: CompetitionResult
   wins?: number
+  instructor?: string // seminar
+  title?: string // milestone
   notes?: string
 }
 

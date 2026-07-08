@@ -51,6 +51,14 @@ export function describeEvent(
       })
     case 'competition':
       return event.competitionName || t('type.competition')
+    case 'injury':
+      return t('type.injury')
+    case 'seminar':
+      return event.instructor
+        ? t('tl.seminar', { name: event.instructor })
+        : t('type.seminar')
+    case 'milestone':
+      return event.title || t('type.milestone')
   }
 }
 

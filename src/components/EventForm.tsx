@@ -11,7 +11,16 @@ import {
   type TimelineEvent,
 } from '../types'
 
-const EVENT_TYPES: EventType[] = ['start', 'school', 'stripe', 'belt', 'competition']
+const EVENT_TYPES: EventType[] = [
+  'start',
+  'school',
+  'stripe',
+  'belt',
+  'competition',
+  'seminar',
+  'injury',
+  'milestone',
+]
 const RESULTS: CompetitionResult[] = ['gold', 'silver', 'bronze', 'participated']
 
 function today(): string {
@@ -35,6 +44,8 @@ export function EventForm({ events, onSave, editing, onCancelEdit }: EventFormPr
   const [competitionName, setCompetitionName] = useState('')
   const [result, setResult] = useState<CompetitionResult>('gold')
   const [wins, setWins] = useState(0)
+  const [instructor, setInstructor] = useState('')
+  const [title, setTitle] = useState('')
   const [notes, setNotes] = useState('')
 
   useEffect(() => {
@@ -47,6 +58,8 @@ export function EventForm({ events, onSave, editing, onCancelEdit }: EventFormPr
     setCompetitionName(editing.competitionName ?? '')
     setResult(editing.result ?? 'gold')
     setWins(editing.wins ?? 0)
+    setInstructor(editing.instructor ?? '')
+    setTitle(editing.title ?? '')
     setNotes(editing.notes ?? '')
   }, [editing])
 
@@ -58,6 +71,8 @@ export function EventForm({ events, onSave, editing, onCancelEdit }: EventFormPr
   function reset() {
     setNotes('')
     setCompetitionName('')
+    setInstructor('')
+    setTitle('')
   }
 
   function handleSubmit(e: FormEvent) {
@@ -76,6 +91,8 @@ export function EventForm({ events, onSave, editing, onCancelEdit }: EventFormPr
       event.result = result
       event.wins = wins > 0 ? wins : undefined
     }
+    if (type === 'seminar') event.instructor = instructor.trim() || undefined
+    if (type === 'milestone') event.title = title.trim() || undefined
     onSave(event)
     reset()
   }
@@ -197,6 +214,30 @@ export function EventForm({ events, onSave, editing, onCancelEdit }: EventFormPr
             />
           </label>
         </>
+      )}
+
+      {type === 'seminar' && (
+        <label className="field">
+          <span>{t('form.instructor')}</span>
+          <input
+            type="text"
+            value={instructor}
+            placeholder={t('form.instructorPlaceholder')}
+            onChange={(e) => setInstructor(e.target.value)}
+          />
+        </label>
+      )}
+
+      {type === 'milestone' && (
+        <label className="field">
+          <span>{t('form.milestoneTitle')}</span>
+          <input
+            type="text"
+            value={title}
+            placeholder={t('form.milestonePlaceholder')}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </label>
       )}
 
       <label className="field">
