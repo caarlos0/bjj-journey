@@ -1,10 +1,12 @@
 import { useRef } from 'react'
 import { useI18n } from '../i18n'
+import { blobToDataUrl, getAllPhotos } from '../photos'
 import type { TimelineEvent } from '../types'
 
 export interface BackupData {
   name: string
   events: TimelineEvent[]
+  photos?: Record<string, string> // event id → data URL
 }
 
 interface BackupProps {
@@ -17,9 +19,13 @@ export function Backup({ name, events, onRestore }: BackupProps) {
   const { t } = useI18n()
   const fileRef = useRef<HTMLInputElement>(null)
 
-  function download() {
+  async function download() {
+    const photos: Record<string, string> = {}
+    for (const [id, blob] of await getAllPhotos()) {
+      photos[id] = await blobToDataUrl(blob)
+    }
     const payload = JSON.stringify(
-      { version: 1, exportedAt: new Date().toISOString(), name, events },
+      { version: 2, exportedAt: new Date().toISOString(), name, events, photos },
       null,
       2,
     )
@@ -38,6 +44,8 @@ export function Backup({ name, events, onRestore }: BackupProps) {
       onRestore({
         name: typeof data.name === 'string' ? data.name : '',
         events: data.events,
+        photos:
+          data.photos && typeof data.photos === 'object' ? data.photos : undefined,
       })
     } catch {
       alert(t('backup.invalid'))
@@ -50,7 +58,7 @@ export function Backup({ name, events, onRestore }: BackupProps) {
         type="button"
         className="btn-secondary"
         disabled={events.length === 0}
-        onClick={download}
+        onClick={() => void download()}
       >
         💾 {t('backup.download')}
       </button>

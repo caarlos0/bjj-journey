@@ -27,14 +27,23 @@ function today(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
+export type PhotoChange = File | 'remove' | null
+
 interface EventFormProps {
   events: TimelineEvent[]
-  onSave: (event: TimelineEvent) => void
+  onSave: (event: TimelineEvent, photo: PhotoChange) => void
   editing: TimelineEvent | null
+  editingPhotoUrl?: string
   onCancelEdit: () => void
 }
 
-export function EventForm({ events, onSave, editing, onCancelEdit }: EventFormProps) {
+export function EventForm({
+  events,
+  onSave,
+  editing,
+  editingPhotoUrl,
+  onCancelEdit,
+}: EventFormProps) {
   const { t } = useI18n()
   const [type, setType] = useState<EventType>('start')
   const [date, setDate] = useState(today())
@@ -47,6 +56,7 @@ export function EventForm({ events, onSave, editing, onCancelEdit }: EventFormPr
   const [instructor, setInstructor] = useState('')
   const [title, setTitle] = useState('')
   const [notes, setNotes] = useState('')
+  const [photo, setPhoto] = useState<PhotoChange>(null)
 
   useEffect(() => {
     if (!editing) return
@@ -61,6 +71,7 @@ export function EventForm({ events, onSave, editing, onCancelEdit }: EventFormPr
     setInstructor(editing.instructor ?? '')
     setTitle(editing.title ?? '')
     setNotes(editing.notes ?? '')
+    setPhoto(null)
   }, [editing])
 
   // Black belts take up to 6 degrees before coral; colored belts cap at
@@ -73,6 +84,7 @@ export function EventForm({ events, onSave, editing, onCancelEdit }: EventFormPr
     setCompetitionName('')
     setInstructor('')
     setTitle('')
+    setPhoto(null)
   }
 
   function handleSubmit(e: FormEvent) {
@@ -93,9 +105,11 @@ export function EventForm({ events, onSave, editing, onCancelEdit }: EventFormPr
     }
     if (type === 'seminar') event.instructor = instructor.trim() || undefined
     if (type === 'milestone') event.title = title.trim() || undefined
-    onSave(event)
+    onSave(event, photo)
     reset()
   }
+
+  const hasCurrentPhoto = !!editing && !!editingPhotoUrl && photo === null
 
   return (
     <form className="event-form" onSubmit={handleSubmit}>
@@ -249,6 +263,27 @@ export function EventForm({ events, onSave, editing, onCancelEdit }: EventFormPr
           onChange={(e) => setNotes(e.target.value)}
         />
       </label>
+
+      <label className="field">
+        <span>{t('form.photo')}</span>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setPhoto(e.target.files?.[0] ?? null)}
+        />
+      </label>
+      {hasCurrentPhoto && (
+        <div className="photo-preview">
+          <img src={editingPhotoUrl} alt="" />
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => setPhoto('remove')}
+          >
+            {t('form.removePhoto')}
+          </button>
+        </div>
+      )}
 
       <button type="submit" className="btn-primary">
         {editing ? t('form.update') : t('form.save')}

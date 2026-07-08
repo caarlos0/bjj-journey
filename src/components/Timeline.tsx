@@ -32,10 +32,11 @@ function matTime(
 interface TimelineProps {
   events: TimelineEvent[]
   name: string
+  photos?: Record<string, string>
 }
 
 export const Timeline = forwardRef<HTMLDivElement, TimelineProps>(
-  function Timeline({ events, name }, ref) {
+  function Timeline({ events, name, photos = {} }, ref) {
     const { t, formatDate } = useI18n()
     const sorted = sortByDate(events)
 
@@ -134,6 +135,9 @@ export const Timeline = forwardRef<HTMLDivElement, TimelineProps>(
                     </p>
                   )}
                   {event.notes && <p className="timeline-notes">{event.notes}</p>}
+                  {photos[event.id] && (
+                    <img className="timeline-photo" src={photos[event.id]} alt="" />
+                  )}
                 </div>
               </li>
             )

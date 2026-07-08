@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { toPng } from 'html-to-image'
 import { Backup, type BackupData } from './components/Backup'
-import { EventForm } from './components/EventForm'
+import { EventForm, type PhotoChange } from './components/EventForm'
 import { EventList } from './components/EventList'
 import { Timeline } from './components/Timeline'
 import { useI18n, type Lang } from './i18n'
+import { dataUrlToBlob, deletePhoto, putPhoto, resizeImage } from './photos'
 import { loadEvents, loadName, saveEvents, saveName } from './storage'
+import { usePhotos } from './usePhotos'
 import {
   buildShareUrl,
   clearShareHash,
@@ -24,6 +26,7 @@ export default function App() {
     parseShareHash(location.hash),
   )
   const [editing, setEditing] = useState<TimelineEvent | null>(null)
+  const { photoUrls, reloadPhotos } = usePhotos()
   const timelineRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -40,12 +43,19 @@ export default function App() {
     saveEvents(next)
   }
 
-  function saveEvent(event: TimelineEvent) {
+  async function saveEvent(event: TimelineEvent, photo: PhotoChange) {
     if (editing) {
       updateEvents(events.map((e) => (e.id === event.id ? event : e)))
       setEditing(null)
     } else {
       updateEvents([...events, event])
+    }
+    if (photo instanceof File) {
+      await putPhoto(event.id, await resizeImage(photo))
+      await reloadPhotos()
+    } else if (photo === 'remove') {
+      await deletePhoto(event.id)
+      await reloadPhotos()
     }
   }
 
@@ -67,11 +77,15 @@ export default function App() {
     closeShared()
   }
 
-  function restoreBackup(data: BackupData) {
+  async function restoreBackup(data: BackupData) {
     if (events.length > 0 && !confirm(t('shared.confirmReplace'))) return
     setEditing(null)
     updateEvents(data.events)
     handleName(data.name)
+    for (const [id, dataUrl] of Object.entries(data.photos ?? {})) {
+      await putPhoto(id, await dataUrlToBlob(dataUrl))
+    }
+    await reloadPhotos()
   }
 
   function closeShared() {
@@ -209,8 +223,9 @@ export default function App() {
             <h2 className="panel-title">{t('panel.addEvent')}</h2>
             <EventForm
               events={events}
-              onSave={saveEvent}
+              onSave={(event, photo) => void saveEvent(event, photo)}
               editing={editing}
+              editingPhotoUrl={editing ? photoUrls[editing.id] : undefined}
               onCancelEdit={() => setEditing(null)}
             />
 
@@ -223,6 +238,7 @@ export default function App() {
                 if (!confirm(t('form.confirmDelete'))) return
                 if (editing?.id === id) setEditing(null)
                 updateEvents(events.filter((e) => e.id !== id))
+                void deletePhoto(id).then(reloadPhotos)
               }}
             />
 
@@ -232,7 +248,12 @@ export default function App() {
         )}
 
         <section className="panel panel-right">
-          <Timeline ref={timelineRef} events={viewEvents} name={viewName} />
+          <Timeline
+            ref={timelineRef}
+            events={viewEvents}
+            name={viewName}
+            photos={shared ? undefined : photoUrls}
+          />
         </section>
       </main>
 
