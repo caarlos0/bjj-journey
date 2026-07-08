@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
-import { getAllPhotos } from './photos'
+import { blobToDataUrl, getAllPhotos } from './photos'
 
-// Object URLs for every stored photo, keyed by event id. Call reload
-// after writing to or deleting from the photo store.
+// Data URLs for every stored photo, keyed by event id. Data URLs (not
+// object URLs) so html-to-image can embed them directly when exporting
+// — fetching blob: URLs during capture is unreliable. Call reload after
+// writing to or deleting from the photo store.
 export function usePhotos(): {
   photoUrls: Record<string, string>
   reloadPhotos: () => Promise<void>
@@ -11,12 +13,9 @@ export function usePhotos(): {
 
   const reloadPhotos = useCallback(async () => {
     const all = await getAllPhotos()
-    setPhotoUrls((prev) => {
-      for (const url of Object.values(prev)) URL.revokeObjectURL(url)
-      const next: Record<string, string> = {}
-      for (const [id, blob] of all) next[id] = URL.createObjectURL(blob)
-      return next
-    })
+    const next: Record<string, string> = {}
+    for (const [id, blob] of all) next[id] = await blobToDataUrl(blob)
+    setPhotoUrls(next)
   }, [])
 
   useEffect(() => {
