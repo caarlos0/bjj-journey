@@ -339,13 +339,23 @@ input[type='date'] {
   height: 22px;
   margin: 0 auto 56px;
   overflow: hidden;
+  white-space: nowrap;
   width: 480px;
 }
 
 .summary-belt-strip span {
   display: inline-block;
   height: 100%;
-  width: 20%;
+  position: relative;
+}
+
+.belt-strip-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 34%;
+  transform: translateX(-50%);
 }
 
 .summary-title {
@@ -611,6 +621,7 @@ input[type='date'] {
 
 .timeline-header-belt span {
   flex: 1;
+  position: relative;
 }
 
 .timeline-header h2 {

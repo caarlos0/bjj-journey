@@ -154,7 +154,7 @@ export function EventForm({
           <span>{t('form.belt')}</span>
           <select value={belt} onChange={(e) => setBelt(e.target.value as BeltColor)}>
             <optgroup label={t('belt.groupAdult')}>
-              {ADULT_BELTS.map((b) => (
+              {ADULT_BELTS.filter((b) => b !== 'white').map((b) => (
                 <option key={b} value={b}>
                   {t(`belt.${b}`)}
                 </option>
