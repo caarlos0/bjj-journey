@@ -25,7 +25,9 @@ const events: TimelineEvent[] = [
 describe('share url', () => {
   it('round-trips name and events through the hash', () => {
     const url = buildShareUrl({ name: 'Carlos Becker', events })
-    expect(url.startsWith('https://bjj.example/#j=')).toBe(true)
+    expect(url.startsWith('https://bjj.example/#j/')).toBe(true)
+    expect(url).not.toContain('=')
+    expect(url).not.toContain('+')
     const parsed = parseShareHash(new URL(url).hash)
     expect(parsed).toEqual({ name: 'Carlos Becker', events })
   })
@@ -33,11 +35,12 @@ describe('share url', () => {
   it('rejects hashes without the payload marker', () => {
     expect(parseShareHash('')).toBeNull()
     expect(parseShareHash('#foo')).toBeNull()
-    expect(parseShareHash('#j=')).toBeNull()
+    expect(parseShareHash('#j/')).toBeNull()
+    expect(parseShareHash('#j=legacy')).toBeNull()
   })
 
   it('rejects garbage payloads', () => {
-    expect(parseShareHash('#j=not-a-real-payload')).toBeNull()
+    expect(parseShareHash('#j/not-a-real-payload')).toBeNull()
   })
 
   it('rejects payloads without an events array', () => {
