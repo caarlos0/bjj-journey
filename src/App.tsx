@@ -5,6 +5,7 @@ import { EventList } from './components/EventList'
 import { Timeline } from './components/Timeline'
 import { useI18n, type Lang } from './i18n'
 import { loadEvents, loadName, saveEvents, saveName } from './storage'
+import { useInstall } from './useInstall'
 import {
   buildShareUrl,
   clearShareHash,
@@ -23,6 +24,7 @@ export default function App() {
     parseShareHash(location.hash),
   )
   const timelineRef = useRef<HTMLDivElement>(null)
+  const { available: installAvailable, promptInstall } = useInstall()
 
   useEffect(() => {
     const onHashChange = () => setShared(parseShareHash(location.hash))
@@ -200,6 +202,21 @@ export default function App() {
       </main>
 
       <footer className="app-footer">
+        {installAvailable && (
+          <p>
+            <button
+              type="button"
+              className="btn-install"
+              onClick={() =>
+                installAvailable === 'native'
+                  ? promptInstall()
+                  : alert(t('install.iosHint'))
+              }
+            >
+              📲 {t('install.button')}
+            </button>
+          </p>
+        )}
         {t('footer.by')}{' '}
         <a href="https://caarlos0.dev" target="_blank" rel="noreferrer">
           caarlos0.dev
