@@ -36,9 +36,10 @@ export function Belt({ color, stripes = 0, width = 120, scale = 1 }: BeltProps) 
         className="belt-rankbar"
         style={{
           backgroundColor: rankBarColor,
-          width: (stripes > 4 ? 48 : 34) * scale,
+          // Wide enough for the stripes plus padding, never narrower
+          // than the classic empty rank bar.
+          width: Math.max(34, 7 * Math.min(stripes, 6) + 7) * scale,
           marginRight: 14 * scale,
-          gap: 3 * scale,
           padding: `0 ${5 * scale}px`,
         }}
       >
@@ -48,6 +49,7 @@ export function Belt({ color, stripes = 0, width = 120, scale = 1 }: BeltProps) 
             className="belt-stripe"
             style={{
               width: 4 * scale,
+              marginLeft: i === 0 ? 0 : 3 * scale,
               ...(color === 'coral' ? { backgroundColor: '#1a1a1a' } : {}),
             }}
           />
