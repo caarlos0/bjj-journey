@@ -220,6 +220,7 @@ export default function App() {
               editingId={editing?.id}
               onEdit={startEdit}
               onDelete={(id) => {
+                if (!confirm(t('form.confirmDelete'))) return
                 if (editing?.id === id) setEditing(null)
                 updateEvents(events.filter((e) => e.id !== id))
               }}
