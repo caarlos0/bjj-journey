@@ -41,7 +41,15 @@ export const SummaryCard = forwardRef<HTMLDivElement, SummaryCardProps>(
             ))}
           </div>
 
-          <h2 className="summary-title">{t('tl.title')}</h2>
+          <h2 className="summary-title">
+            {t('tl.titleBreak')
+              .split('\n')
+              .map((line) => (
+                <span key={line} className="summary-title-line">
+                  {line}
+                </span>
+              ))}
+          </h2>
           {name && <p className="summary-name">{name}</p>}
           {duration && <p className="summary-duration">{duration}</p>}
 

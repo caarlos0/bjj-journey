@@ -146,6 +146,25 @@ export default function App() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  async function capture(node: HTMLElement, pixelRatio: number): Promise<string> {
+    await document.fonts.ready
+    // Make sure every photo is fully decoded before serializing.
+    await Promise.all(
+      Array.from(node.querySelectorAll('img')).map((img) =>
+        img.decode().catch(() => {}),
+      ),
+    )
+    const options = { pixelRatio, backgroundColor: '#14161a' }
+    // Safari decodes images inside the SVG capture lazily, so the first
+    // render(s) come out with blank photos. Warm-up passes are the
+    // established workaround; the last pass has everything painted.
+    if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+      await toPng(node, options)
+      await toPng(node, options)
+    }
+    return toPng(node, options)
+  }
+
   async function deliverPng(dataUrl: string) {
     // Native share sheet only on mobile: it's how you post to social
     // apps there. On desktop it's clunky, so download instead.
@@ -172,11 +191,7 @@ export default function App() {
     if (!node || exporting) return
     setExporting(true)
     try {
-      const dataUrl = await toPng(node, {
-        pixelRatio: 2,
-        backgroundColor: '#14161a',
-      })
-      await deliverPng(dataUrl)
+      await deliverPng(await capture(node, 2))
     } finally {
       setExporting(false)
     }
@@ -188,15 +203,10 @@ export default function App() {
     if (!cardFormat) return
     let cancelled = false
     const run = async () => {
-      await document.fonts.ready
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
       const node = cardRef.current
       if (node && !cancelled) {
-        const dataUrl = await toPng(node, {
-          pixelRatio: 1,
-          backgroundColor: '#14161a',
-        })
-        await deliverPng(dataUrl)
+        await deliverPng(await capture(node, 1))
       }
       setCardFormat(null)
       setExporting(false)

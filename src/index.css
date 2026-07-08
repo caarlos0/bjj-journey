@@ -357,6 +357,11 @@ input[type='date'] {
   margin: 0 0 36px;
 }
 
+.summary-title-line {
+  display: block;
+  white-space: nowrap;
+}
+
 .summary-name {
   color: var(--accent);
   font-size: 46px;
