@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { beltAtDate } from '../describe'
 import { useI18n } from '../i18n'
 import { EVENT_ICONS, RESULT_ICONS } from '../icons'
 import {
@@ -18,12 +19,13 @@ function today(): string {
 }
 
 interface EventFormProps {
+  events: TimelineEvent[]
   onSave: (event: TimelineEvent) => void
   editing: TimelineEvent | null
   onCancelEdit: () => void
 }
 
-export function EventForm({ onSave, editing, onCancelEdit }: EventFormProps) {
+export function EventForm({ events, onSave, editing, onCancelEdit }: EventFormProps) {
   const { t } = useI18n()
   const [type, setType] = useState<EventType>('start')
   const [date, setDate] = useState(today())
@@ -48,6 +50,11 @@ export function EventForm({ onSave, editing, onCancelEdit }: EventFormProps) {
     setNotes(editing.notes ?? '')
   }, [editing])
 
+  // Black belts take up to 6 degrees before coral; colored belts cap at
+  // 4 stripes.
+  const onBlackBelt = beltAtDate(events, date) === 'black'
+  const maxStripes = onBlackBelt ? 6 : 4
+
   function reset() {
     setNotes('')
     setCompetitionName('')
@@ -63,7 +70,7 @@ export function EventForm({ onSave, editing, onCancelEdit }: EventFormProps) {
     }
     if (type === 'start' || type === 'school') event.school = school.trim() || undefined
     if (type === 'belt') event.belt = belt
-    if (type === 'stripe') event.stripe = stripe
+    if (type === 'stripe') event.stripe = Math.min(stripe, maxStripes)
     if (type === 'competition') {
       event.competitionName = competitionName.trim() || undefined
       event.result = result
@@ -142,8 +149,11 @@ export function EventForm({ onSave, editing, onCancelEdit }: EventFormProps) {
       {type === 'stripe' && (
         <label className="field">
           <span>{t('form.stripe')}</span>
-          <select value={stripe} onChange={(e) => setStripe(Number(e.target.value))}>
-            {[1, 2, 3, 4].map((n) => (
+          <select
+            value={Math.min(stripe, maxStripes)}
+            onChange={(e) => setStripe(Number(e.target.value))}
+          >
+            {Array.from({ length: maxStripes }, (_, i) => i + 1).map((n) => (
               <option key={n} value={n}>
                 {t(`ordinal.${n}` as 'ordinal.1')}
               </option>

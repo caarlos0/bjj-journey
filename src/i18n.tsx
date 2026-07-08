@@ -64,6 +64,7 @@ const dict = {
     'tl.startNoSchool': 'Started training jiu-jitsu',
     'tl.school': 'Joined {school}',
     'tl.stripe': '{n} stripe on the {belt} belt',
+    'tl.degree': '{n} degree on the {belt} belt',
     'tl.belt': 'Promoted to {belt} belt',
     'tl.wins': '{n} wins',
     'tl.win': '1 win',
@@ -90,6 +91,8 @@ const dict = {
     'ordinal.2': '2nd',
     'ordinal.3': '3rd',
     'ordinal.4': '4th',
+    'ordinal.5': '5th',
+    'ordinal.6': '6th',
   },
   'pt-BR': {
     'app.title': 'BJJ Journey',
@@ -152,6 +155,7 @@ const dict = {
     'tl.startNoSchool': 'Comecei a treinar jiu-jitsu',
     'tl.school': 'Entrei na {school}',
     'tl.stripe': '{n} grau na faixa {belt}',
+    'tl.degree': '{n} grau na faixa {belt}',
     'tl.belt': 'Graduação: faixa {belt}',
     'tl.wins': '{n} vitórias',
     'tl.win': '1 vitória',
@@ -179,6 +183,8 @@ const dict = {
     'ordinal.2': '2º',
     'ordinal.3': '3º',
     'ordinal.4': '4º',
+    'ordinal.5': '5º',
+    'ordinal.6': '6º',
   },
 } as const
 

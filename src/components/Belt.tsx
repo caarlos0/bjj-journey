@@ -22,8 +22,14 @@ export function Belt({ color, stripes = 0, width = 120 }: BeltProps) {
       {style.band && (
         <div className="belt-band" style={{ backgroundColor: style.band }} />
       )}
-      <div className="belt-rankbar" style={{ backgroundColor: rankBarColor }}>
-        {Array.from({ length: Math.min(stripes, 4) }, (_, i) => (
+      <div
+        className="belt-rankbar"
+        style={{
+          backgroundColor: rankBarColor,
+          width: stripes > 4 ? 48 : 34,
+        }}
+      >
+        {Array.from({ length: Math.min(stripes, 6) }, (_, i) => (
           <span
             key={i}
             className="belt-stripe"

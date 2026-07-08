@@ -200,6 +200,7 @@ export default function App() {
 
             <h2 className="panel-title">{t('panel.addEvent')}</h2>
             <EventForm
+              events={events}
               onSave={saveEvent}
               editing={editing}
               onCancelEdit={() => setEditing(null)}

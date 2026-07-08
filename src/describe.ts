@@ -18,6 +18,16 @@ export function beltAt(
   return belt
 }
 
+// Belt in effect on a given date, considering only belt events dated on
+// or before it.
+export function beltAtDate(events: TimelineEvent[], date: string): BeltColor {
+  let belt: BeltColor = 'white'
+  for (const e of sortByDate(events)) {
+    if (e.type === 'belt' && e.belt && e.date <= date) belt = e.belt
+  }
+  return belt
+}
+
 export function describeEvent(
   event: TimelineEvent,
   currentBelt: BeltColor,
@@ -31,7 +41,7 @@ export function describeEvent(
     case 'school':
       return t('tl.school', { school: event.school ?? '?' })
     case 'stripe':
-      return t('tl.stripe', {
+      return t(currentBelt === 'black' ? 'tl.degree' : 'tl.stripe', {
         n: t(`ordinal.${event.stripe ?? 1}` as TKey),
         belt: t(`belt.${currentBelt}` as TKey).toLowerCase(),
       })
