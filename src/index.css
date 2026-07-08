@@ -125,6 +125,22 @@ body {
   margin-top: 20px;
 }
 
+.profile-row {
+  display: flex;
+  gap: 6px;
+}
+
+.profile-row select {
+  flex: 1;
+}
+
+.btn-profile {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1;
+  padding: 0 12px;
+}
+
 /* ---------- form ---------- */
 
 .field {

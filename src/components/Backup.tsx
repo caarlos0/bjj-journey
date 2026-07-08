@@ -20,9 +20,12 @@ export function Backup({ name, events, onRestore }: BackupProps) {
   const fileRef = useRef<HTMLInputElement>(null)
 
   async function download() {
+    // Photos are stored globally by event id; only bundle the ones
+    // belonging to this profile's events.
+    const ids = new Set(events.map((e) => e.id))
     const photos: Record<string, string> = {}
     for (const [id, blob] of await getAllPhotos()) {
-      photos[id] = await blobToDataUrl(blob)
+      if (ids.has(id)) photos[id] = await blobToDataUrl(blob)
     }
     const payload = JSON.stringify(
       { version: 2, exportedAt: new Date().toISOString(), name, events, photos },

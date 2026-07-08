@@ -1,11 +1,58 @@
 import type { TimelineEvent } from './types'
 
-const EVENTS_KEY = 'bjjourney:events'
-const NAME_KEY = 'bjjourney:name'
+const PROFILES_KEY = 'bjjourney:profiles'
+const ACTIVE_KEY = 'bjjourney:active'
+const LEGACY_EVENTS_KEY = 'bjjourney:events'
+const LEGACY_NAME_KEY = 'bjjourney:name'
 
-export function loadEvents(): TimelineEvent[] {
+const eventsKey = (profile: string) => `bjjourney:${profile}:events`
+const nameKey = (profile: string) => `bjjourney:${profile}:name`
+
+// Ensures the profile list exists, migrating pre-profile data into the
+// first profile. Idempotent.
+export function initProfiles(): { profiles: string[]; active: string } {
+  let profiles: string[] | null = null
   try {
-    const raw = localStorage.getItem(EVENTS_KEY)
+    const parsed = JSON.parse(localStorage.getItem(PROFILES_KEY) ?? 'null')
+    if (Array.isArray(parsed) && parsed.length > 0) profiles = parsed
+  } catch {
+    // fall through to re-init
+  }
+  if (!profiles) {
+    const id = crypto.randomUUID()
+    const legacyEvents = localStorage.getItem(LEGACY_EVENTS_KEY)
+    const legacyName = localStorage.getItem(LEGACY_NAME_KEY)
+    if (legacyEvents) localStorage.setItem(eventsKey(id), legacyEvents)
+    if (legacyName) localStorage.setItem(nameKey(id), legacyName)
+    localStorage.removeItem(LEGACY_EVENTS_KEY)
+    localStorage.removeItem(LEGACY_NAME_KEY)
+    profiles = [id]
+    localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles))
+  }
+  let active = localStorage.getItem(ACTIVE_KEY)
+  if (!active || !profiles.includes(active)) {
+    active = profiles[0]
+    localStorage.setItem(ACTIVE_KEY, active)
+  }
+  return { profiles, active }
+}
+
+export function saveProfiles(profiles: string[]) {
+  localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles))
+}
+
+export function setActiveProfile(id: string) {
+  localStorage.setItem(ACTIVE_KEY, id)
+}
+
+export function removeProfileData(profile: string) {
+  localStorage.removeItem(eventsKey(profile))
+  localStorage.removeItem(nameKey(profile))
+}
+
+export function loadEvents(profile: string): TimelineEvent[] {
+  try {
+    const raw = localStorage.getItem(eventsKey(profile))
     if (!raw) return []
     const parsed = JSON.parse(raw)
     return Array.isArray(parsed) ? parsed : []
@@ -14,14 +61,14 @@ export function loadEvents(): TimelineEvent[] {
   }
 }
 
-export function saveEvents(events: TimelineEvent[]) {
-  localStorage.setItem(EVENTS_KEY, JSON.stringify(events))
+export function saveEvents(profile: string, events: TimelineEvent[]) {
+  localStorage.setItem(eventsKey(profile), JSON.stringify(events))
 }
 
-export function loadName(): string {
-  return localStorage.getItem(NAME_KEY) ?? ''
+export function loadName(profile: string): string {
+  return localStorage.getItem(nameKey(profile)) ?? ''
 }
 
-export function saveName(name: string) {
-  localStorage.setItem(NAME_KEY, name)
+export function saveName(profile: string, name: string) {
+  localStorage.setItem(nameKey(profile), name)
 }

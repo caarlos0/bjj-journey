@@ -6,6 +6,11 @@ const dict = {
   'en-US': {
     'app.title': 'BJJ Journey',
     'app.tagline': 'Your jiu-jitsu story, one roll at a time',
+    'profile.title': 'Profile',
+    'profile.add': 'New profile',
+    'profile.delete': 'Delete profile',
+    'profile.confirmDelete': 'Delete this profile and all its events?',
+    'profile.default': 'Profile',
     'panel.yourName': 'Your name',
     'panel.yourNamePlaceholder': 'e.g. Carlos Gracie',
     'panel.addEvent': 'Add event',
@@ -117,6 +122,11 @@ const dict = {
   'pt-BR': {
     'app.title': 'BJJ Journey',
     'app.tagline': 'Sua história no jiu-jitsu, um rola de cada vez',
+    'profile.title': 'Perfil',
+    'profile.add': 'Novo perfil',
+    'profile.delete': 'Excluir perfil',
+    'profile.confirmDelete': 'Excluir este perfil e todos os seus eventos?',
+    'profile.default': 'Perfil',
     'panel.yourName': 'Seu nome',
     'panel.yourNamePlaceholder': 'ex. Carlos Gracie',
     'panel.addEvent': 'Adicionar evento',

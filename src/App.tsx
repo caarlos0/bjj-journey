@@ -7,7 +7,16 @@ import { EventList } from './components/EventList'
 import { Timeline } from './components/Timeline'
 import { useI18n, type Lang } from './i18n'
 import { dataUrlToBlob, deletePhoto, putPhoto, resizeImage } from './photos'
-import { loadEvents, loadName, saveEvents, saveName } from './storage'
+import {
+  initProfiles,
+  loadEvents,
+  loadName,
+  removeProfileData,
+  saveEvents,
+  saveName,
+  saveProfiles,
+  setActiveProfile,
+} from './storage'
 import { usePhotos } from './usePhotos'
 import {
   buildShareUrl,
@@ -19,8 +28,13 @@ import type { TimelineEvent } from './types'
 
 export default function App() {
   const { t, lang, setLang } = useI18n()
-  const [events, setEvents] = useState<TimelineEvent[]>(loadEvents)
-  const [name, setName] = useState(loadName)
+  const [initial] = useState(initProfiles)
+  const [profiles, setProfiles] = useState<string[]>(initial.profiles)
+  const [active, setActive] = useState(initial.active)
+  const [events, setEvents] = useState<TimelineEvent[]>(() =>
+    loadEvents(initial.active),
+  )
+  const [name, setName] = useState(() => loadName(initial.active))
   const [exporting, setExporting] = useState(false)
   const [copied, setCopied] = useState(false)
   const [shared, setShared] = useState<SharedData | null>(() =>
@@ -44,7 +58,35 @@ export default function App() {
 
   function updateEvents(next: TimelineEvent[]) {
     setEvents(next)
-    saveEvents(next)
+    saveEvents(active, next)
+  }
+
+  function switchProfile(id: string) {
+    setActive(id)
+    setActiveProfile(id)
+    setEvents(loadEvents(id))
+    setName(loadName(id))
+    setEditing(null)
+  }
+
+  function addProfile() {
+    const id = crypto.randomUUID()
+    const next = [...profiles, id]
+    setProfiles(next)
+    saveProfiles(next)
+    switchProfile(id)
+  }
+
+  function deleteProfile() {
+    if (!confirm(t('profile.confirmDelete'))) return
+    for (const e of events) void deletePhoto(e.id)
+    removeProfileData(active)
+    let next = profiles.filter((id) => id !== active)
+    if (next.length === 0) next = [crypto.randomUUID()]
+    setProfiles(next)
+    saveProfiles(next)
+    switchProfile(next[0])
+    void reloadPhotos()
   }
 
   async function saveEvent(event: TimelineEvent, photo: PhotoChange) {
@@ -70,7 +112,7 @@ export default function App() {
 
   function handleName(value: string) {
     setName(value)
-    saveName(value)
+    saveName(active, value)
   }
 
   function importShared() {
@@ -280,6 +322,41 @@ export default function App() {
       <main className={`app-main ${shared ? 'app-main-shared' : ''}`}>
         {!shared && (
           <aside className="panel panel-left">
+            <label className="field">
+              <span>{t('profile.title')}</span>
+              <div className="profile-row">
+                <select
+                  value={active}
+                  onChange={(e) => switchProfile(e.target.value)}
+                >
+                  {profiles.map((id, i) => (
+                    <option key={id} value={id}>
+                      {(id === active ? name : loadName(id)) ||
+                        `${t('profile.default')} ${i + 1}`}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="btn-secondary btn-profile"
+                  title={t('profile.add')}
+                  aria-label={t('profile.add')}
+                  onClick={addProfile}
+                >
+                  +
+                </button>
+                <button
+                  type="button"
+                  className="btn-secondary btn-profile"
+                  title={t('profile.delete')}
+                  aria-label={t('profile.delete')}
+                  onClick={deleteProfile}
+                >
+                  🗑
+                </button>
+              </div>
+            </label>
+
             <label className="field">
               <span>{t('panel.yourName')}</span>
               <input
