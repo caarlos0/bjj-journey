@@ -44,7 +44,8 @@ export default function App() {
   const { photoUrls, reloadPhotos } = usePhotos()
   const timelineRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
-  const [exportMenu, setExportMenu] = useState(false)
+  const shareWrapRef = useRef<HTMLDivElement>(null)
+  const [shareMenu, setShareMenu] = useState(false)
   const [cardFormat, setCardFormat] = useState<CardFormat | null>(null)
 
   useEffect(() => {
@@ -52,6 +53,16 @@ export default function App() {
     window.addEventListener('hashchange', onHashChange)
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
+
+  // Close the share dropdown when clicking anywhere outside it.
+  useEffect(() => {
+    if (!shareMenu) return
+    const onDown = (e: MouseEvent) => {
+      if (!shareWrapRef.current?.contains(e.target as Node)) setShareMenu(false)
+    }
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
+  }, [shareMenu])
 
   const viewEvents = shared ? shared.events : events
   const viewName = shared ? shared.name : name
@@ -218,7 +229,7 @@ export default function App() {
   }, [cardFormat])
 
   function pickExport(format: CardFormat | 'full') {
-    setExportMenu(false)
+    setShareMenu(false)
     if (format === 'full') {
       void exportTimeline()
     } else {
@@ -248,25 +259,28 @@ export default function App() {
             <option value="en-US">🇺🇸 English</option>
             <option value="pt-BR">🇧🇷 Português</option>
           </select>
-          <button
-            type="button"
-            className="btn-secondary"
-            disabled={viewEvents.length === 0}
-            onClick={handleShareLink}
-          >
-            {copied ? `✅ ${t('share.copied')}` : `🔗 ${t('share.button')}`}
-          </button>
-          <div className="export-wrap">
+          <div className="export-wrap" ref={shareWrapRef}>
             <button
               type="button"
               className="btn-primary"
               disabled={viewEvents.length === 0 || exporting}
-              onClick={() => setExportMenu((v) => !v)}
+              onClick={() => setShareMenu((v) => !v)}
             >
-              {exporting ? t('export.sharing') : `📸 ${t('export.button')}`}
+              {exporting ? t('export.sharing') : `📤 ${t('share.menu')}`}
             </button>
-            {exportMenu && (
+            {shareMenu && (
               <div className="export-menu">
+                <button type="button" onClick={handleShareLink}>
+                  {copied ? `✅ ${t('share.copied')}` : `🔗 ${t('share.button')}`}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => pickExport('story')}
+                  title={t('export.instagramHint')}
+                >
+                  📸 {t('export.instagram')}
+                </button>
+                <div className="export-menu-sep" />
                 <button type="button" onClick={() => pickExport('full')}>
                   📜 {t('export.full')}
                 </button>
