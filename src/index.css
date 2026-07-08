@@ -375,6 +375,19 @@ input[type='date'] {
   width: 100%;
 }
 
+/* ---------- backup ---------- */
+
+.backup {
+  display: flex;
+  gap: 8px;
+}
+
+.backup .btn-secondary {
+  flex: 1;
+  font-size: 15px;
+  padding: 8px 10px;
+}
+
 /* ---------- timeline ---------- */
 
 .panel-right {

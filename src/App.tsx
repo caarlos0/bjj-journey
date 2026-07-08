@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { toPng } from 'html-to-image'
+import { Backup, type BackupData } from './components/Backup'
 import { EventForm } from './components/EventForm'
 import { EventList } from './components/EventList'
 import { Timeline } from './components/Timeline'
@@ -64,6 +65,13 @@ export default function App() {
     updateEvents(shared.events)
     handleName(shared.name)
     closeShared()
+  }
+
+  function restoreBackup(data: BackupData) {
+    if (events.length > 0 && !confirm(t('shared.confirmReplace'))) return
+    setEditing(null)
+    updateEvents(data.events)
+    handleName(data.name)
   }
 
   function closeShared() {
@@ -216,6 +224,9 @@ export default function App() {
                 updateEvents(events.filter((e) => e.id !== id))
               }}
             />
+
+            <h2 className="panel-title">{t('backup.title')}</h2>
+            <Backup name={name} events={events} onRestore={restoreBackup} />
           </aside>
         )}
 
