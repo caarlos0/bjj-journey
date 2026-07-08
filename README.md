@@ -9,17 +9,24 @@ backend and nothing leaves your machine.
 
 ## Features
 
-- Add events on the left panel, see the timeline render live on the right:
-  started training, changed school, new stripe, new belt, competitions
-  (with result and win count).
+- Add and edit events on the left panel, see the timeline render live on the
+  right: started training, changed school, new stripe, new belt,
+  competitions (with result and win count), seminars, injuries/time off, and
+  free-text milestones.
 - Full IBJJF belt system, including kids belts (grey/yellow/orange/green and
-  their white/black-band variants) and coral/red-white/red.
-- Timeline dots and belt graphics colored by your rank at each moment.
-- Export the timeline as a PNG — native share sheet on mobile, download on
-  desktop.
+  their white/black-band variants), coral/red-white/red, and black belt
+  degrees up to the 6th.
+- Timeline dots and belt graphics colored by your rank at each moment, plus
+  a stats header: current belt, competitions, medals, and wins.
+- Photos on events, stored locally in IndexedDB and resized on import.
+- Export as a PNG — full timeline, Story (9:16), or square (1:1) summary
+  card. Native share sheet on mobile, download on desktop.
 - Share a link: the entire timeline is compressed into the URL hash
   (lz-string), so anyone opening it sees your journey — still no backend.
   Visitors can save a shared timeline to their own device.
+- Backup and restore everything (events, name, and photos) as a JSON file.
+- Multiple profiles — track your own journey and your kids' in the same
+  browser.
 - Portuguese (pt-BR, default) and English (en-US).
 
 ## Development
@@ -28,6 +35,7 @@ backend and nothing leaves your machine.
 pnpm install
 pnpm run dev     # start dev server
 pnpm run build   # type-check + production build
+pnpm run test    # vitest
 pnpm run lint    # oxlint
 ```
 
