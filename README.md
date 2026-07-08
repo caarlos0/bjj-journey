@@ -30,3 +30,8 @@ pnpm run dev     # start dev server
 pnpm run build   # type-check + production build
 pnpm run lint    # oxlint
 ```
+
+## Credits
+
+Made by [caarlos0](https://caarlos0.dev) —
+[github.com/caarlos0/bjj-journey](https://github.com/caarlos0/bjj-journey).

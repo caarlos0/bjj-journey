@@ -198,6 +198,21 @@ export default function App() {
           <Timeline ref={timelineRef} events={viewEvents} name={viewName} />
         </section>
       </main>
+
+      <footer className="app-footer">
+        {t('footer.by')}{' '}
+        <a href="https://caarlos0.dev" target="_blank" rel="noreferrer">
+          caarlos0.dev
+        </a>{' '}
+        ·{' '}
+        <a
+          href="https://github.com/caarlos0/bjj-journey"
+          target="_blank"
+          rel="noreferrer"
+        >
+          {t('footer.source')}
+        </a>
+      </footer>
     </div>
   )
 }

@@ -504,6 +504,25 @@ input[type='date'] {
   text-transform: uppercase;
 }
 
+/* ---------- app footer ---------- */
+
+.app-footer {
+  color: var(--text-dim);
+  font-size: 13px;
+  margin-top: 32px;
+  padding: 16px 0;
+  text-align: center;
+}
+
+.app-footer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.app-footer a:hover {
+  text-decoration: underline;
+}
+
 /* ---------- belt graphic ---------- */
 
 .belt {
