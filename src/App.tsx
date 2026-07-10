@@ -5,15 +5,24 @@ import { EventForm, type PhotoChange } from './components/EventForm'
 import { SummaryCard, type CardFormat } from './components/SummaryCard'
 import { EventList } from './components/EventList'
 import { Timeline } from './components/Timeline'
+import { today } from './describe'
+import {
+  ageDivisionChanges,
+  divisionAt,
+  formatDivisions,
+  uniformsAtDate,
+} from './divisions'
 import { useI18n, type Lang } from './i18n'
 import { dataUrlToBlob, deletePhoto, putPhoto, resizeImage } from './photos'
 import {
   initProfiles,
   loadEvents,
   loadName,
+  loadProfile,
   removeProfileData,
   saveEvents,
   saveName,
+  saveProfile,
   saveProfiles,
   setActiveProfile,
 } from './storage'
@@ -24,7 +33,7 @@ import {
   parseShareHash,
   type SharedData,
 } from './share'
-import type { TimelineEvent } from './types'
+import type { AthleteProfile, TimelineEvent } from './types'
 
 export default function App() {
   const { t, lang, setLang } = useI18n()
@@ -35,6 +44,7 @@ export default function App() {
     loadEvents(initial.active),
   )
   const [name, setName] = useState(() => loadName(initial.active))
+  const [profile, setProfile] = useState(() => loadProfile(initial.active))
   const [exporting, setExporting] = useState(false)
   const [copied, setCopied] = useState(false)
   const [shared, setShared] = useState<SharedData | null>(() =>
@@ -66,6 +76,21 @@ export default function App() {
 
   const viewEvents = shared ? shared.events : events
   const viewName = shared ? shared.name : name
+  const currentDate = today()
+  const currentDivisions = uniformsAtDate(events, currentDate).flatMap((uniform) => {
+    const division = divisionAt(events, profile, currentDate, uniform)
+    return division ? [division] : []
+  })
+  const firstEventDate =
+    events.length > 0
+      ? events.reduce(
+          (first, event) => (event.date < first ? event.date : first),
+          events[0].date,
+        )
+      : undefined
+  const localAgeDivisions = ageDivisionChanges(profile.birthYear, firstEventDate)
+  const viewDivisions = shared ? (shared.divisions ?? []) : currentDivisions
+  const viewAgeDivisions = shared ? (shared.ageDivisions ?? []) : localAgeDivisions
 
   function updateEvents(next: TimelineEvent[]) {
     setEvents(next)
@@ -77,6 +102,7 @@ export default function App() {
     setActiveProfile(id)
     setEvents(loadEvents(id))
     setName(loadName(id))
+    setProfile(loadProfile(id))
     setEditing(null)
   }
 
@@ -125,11 +151,17 @@ export default function App() {
     saveName(active, value)
   }
 
+  function handleProfile(value: AthleteProfile) {
+    setProfile(value)
+    saveProfile(active, value)
+  }
+
   async function restoreBackup(data: BackupData) {
     if (events.length > 0 && !confirm(t('shared.confirmReplace'))) return
     setEditing(null)
     updateEvents(data.events)
     handleName(data.name)
+    handleProfile(data.profile)
     for (const [id, dataUrl] of Object.entries(data.photos ?? {})) {
       await putPhoto(id, await dataUrlToBlob(dataUrl))
     }
@@ -142,7 +174,12 @@ export default function App() {
   }
 
   async function handleShareLink() {
-    const url = buildShareUrl({ name: viewName, events: viewEvents })
+    const url = buildShareUrl({
+      name: viewName,
+      events: viewEvents,
+      divisions: viewDivisions,
+      ageDivisions: viewAgeDivisions,
+    })
     await navigator.clipboard.writeText(url)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
@@ -294,6 +331,7 @@ export default function App() {
             ref={cardRef}
             events={viewEvents}
             name={viewName}
+            divisions={viewDivisions}
             format={cardFormat}
           />
         </div>
@@ -358,9 +396,19 @@ export default function App() {
               />
             </label>
 
+            <div className="profile-divisions">
+              {formatDivisions(currentDivisions, t).map((division) => (
+                <p key={division} className="profile-division">
+                  {division}
+                </p>
+              ))}
+            </div>
+
             <h2 className="panel-title">{t('panel.addEvent')}</h2>
             <EventForm
               events={events}
+              profile={profile}
+              onProfileChange={handleProfile}
               onSave={(event, photo) => void saveEvent(event, photo)}
               editing={editing}
               editingPhotoUrl={editing ? photoUrls[editing.id] : undefined}
@@ -381,7 +429,12 @@ export default function App() {
             />
 
             <h2 className="panel-title">{t('backup.title')}</h2>
-            <Backup name={name} events={events} onRestore={restoreBackup} />
+            <Backup
+              name={name}
+              profile={profile}
+              events={events}
+              onRestore={restoreBackup}
+            />
           </aside>
         )}
 
@@ -390,6 +443,8 @@ export default function App() {
             ref={timelineRef}
             events={viewEvents}
             name={viewName}
+            divisions={viewDivisions}
+            ageDivisions={viewAgeDivisions}
             photos={shared ? undefined : photoUrls}
           />
         </section>

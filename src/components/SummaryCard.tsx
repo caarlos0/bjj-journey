@@ -1,8 +1,9 @@
 import { forwardRef } from 'react'
 import { sortByDate } from '../describe'
+import { formatDivisions } from '../divisions'
 import { useI18n } from '../i18n'
 import { computeStats, matTime } from '../stats'
-import { BELT_STYLES, type TimelineEvent } from '../types'
+import { BELT_STYLES, type DivisionSnapshot, type TimelineEvent } from '../types'
 import { Belt } from './Belt'
 import { BeltStrip } from './BeltStrip'
 import { StatChips } from './StatChips'
@@ -12,13 +13,14 @@ export type CardFormat = 'story' | 'square'
 interface SummaryCardProps {
   events: TimelineEvent[]
   name: string
+  divisions?: DivisionSnapshot[]
   format: CardFormat
 }
 
 // Fixed-size card for social exports: 1080x1920 (story) or 1080x1080
 // (square). Rendered off-screen only while exporting.
 export const SummaryCard = forwardRef<HTMLDivElement, SummaryCardProps>(
-  function SummaryCard({ events, name, format }, ref) {
+  function SummaryCard({ events, name, divisions = [], format }, ref) {
     const { t, formatDate } = useI18n()
     const sorted = sortByDate(events)
     const stats = computeStats(sorted)
@@ -49,6 +51,15 @@ export const SummaryCard = forwardRef<HTMLDivElement, SummaryCardProps>(
               ))}
           </h2>
           {name && <p className="summary-name">{name}</p>}
+          {divisions.length > 0 && (
+            <div className="summary-divisions">
+              {formatDivisions(divisions, t).map((division) => (
+                <p key={division} className="summary-division">
+                  {division}
+                </p>
+              ))}
+            </div>
+          )}
           {duration && <p className="summary-duration">{duration}</p>}
 
           <div className="summary-belt-wrap">

@@ -1,22 +1,25 @@
 import { useRef } from 'react'
 import { today } from '../describe'
+import { normalizeProfile } from '../divisions'
 import { useI18n } from '../i18n'
 import { blobToDataUrl, getAllPhotos } from '../photos'
-import type { TimelineEvent } from '../types'
+import type { AthleteProfile, TimelineEvent } from '../types'
 
 export interface BackupData {
   name: string
   events: TimelineEvent[]
+  profile: AthleteProfile
   photos?: Record<string, string> // event id → data URL
 }
 
 interface BackupProps {
   name: string
   events: TimelineEvent[]
+  profile: AthleteProfile
   onRestore: (data: BackupData) => void
 }
 
-export function Backup({ name, events, onRestore }: BackupProps) {
+export function Backup({ name, events, profile, onRestore }: BackupProps) {
   const { t } = useI18n()
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -29,7 +32,14 @@ export function Backup({ name, events, onRestore }: BackupProps) {
       if (ids.has(id)) photos[id] = await blobToDataUrl(blob)
     }
     const payload = JSON.stringify(
-      { version: 2, exportedAt: new Date().toISOString(), name, events, photos },
+      {
+        version: 3,
+        exportedAt: new Date().toISOString(),
+        name,
+        profile,
+        events,
+        photos,
+      },
       null,
       2,
     )
@@ -47,6 +57,7 @@ export function Backup({ name, events, onRestore }: BackupProps) {
       if (!Array.isArray(data.events)) throw new Error('missing events')
       onRestore({
         name: typeof data.name === 'string' ? data.name : '',
+        profile: normalizeProfile(data.profile),
         events: data.events,
         photos:
           data.photos && typeof data.photos === 'object' ? data.photos : undefined,

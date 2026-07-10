@@ -11,20 +11,24 @@ backend and nothing leaves your machine.
 
 - Add and edit events on the left panel, see the timeline render live on the
   right: started training, changed school, new stripe, new belt,
-  competitions (with result and win count), seminars, injuries/time off, and
-  free-text milestones.
+  weight or uniform changes, competitions (with result and win count),
+  seminars, injuries/time off, and free-text milestones.
 - Full IBJJF belt system, including kids belts (grey/yellow/orange/green and
   their white/black-band variants), coral/red-white/red, and black belt
   degrees up to the 6th.
 - Timeline dots and belt graphics colored by your rank at each moment, plus
-  a stats header: current belt, competitions, medals, and wins.
+  a stats header: current belt, IBJJF division, competitions, medals, and wins.
+- 2026 IBJJF age and Gi/No-Gi weight divisions in kg or lb. The first training
+  event captures profile identity, optional initial weight, and uniforms;
+  later changes live on the timeline, competitions keep their selected
+  division (including Absolute), and age progression appears automatically.
 - Photos on events, stored locally in IndexedDB and resized on import.
 - Export as a PNG — full timeline, Story (9:16), or square (1:1) summary
   card. Native share sheet on mobile, download on desktop.
 - Share a link: the entire timeline is compressed into the URL hash
   (lz-string), so anyone opening it sees your journey — still no backend.
   Visitors can save a shared timeline to their own device.
-- Backup and restore everything (events, name, and photos) as a JSON file.
+- Backup and restore everything (events, profile, name, and photos) as JSON.
 - Multiple profiles — track your own journey and your kids' in the same
   browser.
 - Portuguese (pt-BR, default) and English (en-US).

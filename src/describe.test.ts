@@ -110,6 +110,33 @@ describe('describeEvent', () => {
   it('describes a break', () => {
     expect(describeEvent(ev({ type: 'break' }), 'blue', t)).toBe('tl.break')
   })
+
+  it('describes weight and derived age division events', () => {
+    expect(
+      describeEvent(
+        ev({ type: 'weight', weight: 82.3, weightUnit: 'kg' }),
+        'blue',
+        t,
+      ),
+    ).toBe('tl.weight[82.3,kg]')
+    expect(
+      describeEvent(
+        ev({ type: 'age', ageDivision: 'master-3' }),
+        'blue',
+        t,
+      ),
+    ).toBe('tl.ageDivision[division.age.master-3]')
+  })
+
+  it('describes uniform changes', () => {
+    expect(
+      describeEvent(
+        ev({ type: 'uniform', uniforms: ['gi', 'no-gi'] }),
+        'blue',
+        t,
+      ),
+    ).toBe('tl.uniforms[division.uniform.both]')
+  })
 })
 
 describe('restartFlags', () => {
@@ -128,5 +155,16 @@ describe('restartFlags', () => {
       ev({ type: 'start', date: '2016-01-01' }),
     ])
     expect(restartFlags(sorted)).toEqual([false, false])
+  })
+
+  it('does not end a break for age or weight events', () => {
+    const sorted = sortByDate([
+      ev({ type: 'break', date: '2025-01-01' }),
+      ev({ type: 'age', ageDivision: 'master-3', date: '2026-01-01' }),
+      ev({ type: 'weight', weight: 88, weightUnit: 'kg', date: '2026-02-01' }),
+      ev({ type: 'uniform', uniforms: ['gi', 'no-gi'], date: '2026-02-15' }),
+      ev({ type: 'start', date: '2026-03-01' }),
+    ])
+    expect(restartFlags(sorted)).toEqual([false, false, false, false, true])
   })
 })

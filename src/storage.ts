@@ -1,4 +1,5 @@
-import type { TimelineEvent } from './types'
+import { normalizeProfile } from './divisions'
+import type { AthleteProfile, TimelineEvent } from './types'
 
 const PROFILES_KEY = 'bjjourney:profiles'
 const ACTIVE_KEY = 'bjjourney:active'
@@ -7,6 +8,7 @@ const LEGACY_NAME_KEY = 'bjjourney:name'
 
 const eventsKey = (profile: string) => `bjjourney:${profile}:events`
 const nameKey = (profile: string) => `bjjourney:${profile}:name`
+const profileKey = (profile: string) => `bjjourney:${profile}:profile`
 
 // Ensures the profile list exists, migrating pre-profile data into the
 // first profile. Idempotent.
@@ -48,6 +50,7 @@ export function setActiveProfile(id: string) {
 export function removeProfileData(profile: string) {
   localStorage.removeItem(eventsKey(profile))
   localStorage.removeItem(nameKey(profile))
+  localStorage.removeItem(profileKey(profile))
 }
 
 export function loadEvents(profile: string): TimelineEvent[] {
@@ -71,4 +74,16 @@ export function loadName(profile: string): string {
 
 export function saveName(profile: string, name: string) {
   localStorage.setItem(nameKey(profile), name)
+}
+
+export function loadProfile(profile: string): AthleteProfile {
+  try {
+    return normalizeProfile(JSON.parse(localStorage.getItem(profileKey(profile)) ?? 'null'))
+  } catch {
+    return normalizeProfile(null)
+  }
+}
+
+export function saveProfile(profile: string, data: AthleteProfile) {
+  localStorage.setItem(profileKey(profile), JSON.stringify(data))
 }
