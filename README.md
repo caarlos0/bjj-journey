@@ -17,14 +17,18 @@ backend and nothing leaves your machine.
   their white/black-band variants), coral/red-white/red, and black belt
   degrees up to the 6th.
 - Timeline dots and belt graphics colored by your rank at each moment, plus
-  a stats header: current belt, competitions, medals, and wins.
+  a stats header: current belt, IBJJF division, competitions, medals, and wins.
+- 2026 IBJJF age and Gi/No-Gi weight divisions in kg or lb. Profiles can show
+  either or both rulesets, weight changes live on the timeline, competitions
+  keep their selected division (including Absolute), and age progression
+  appears automatically without adding stored events.
 - Photos on events, stored locally in IndexedDB and resized on import.
 - Export as a PNG — full timeline, Story (9:16), or square (1:1) summary
   card. Native share sheet on mobile, download on desktop.
 - Share a link: the entire timeline is compressed into the URL hash
   (lz-string), so anyone opening it sees your journey — still no backend.
   Visitors can save a shared timeline to their own device.
-- Backup and restore everything (events, name, and photos) as a JSON file.
+- Backup and restore everything (events, profile, name, and photos) as JSON.
 - Multiple profiles — track your own journey and your kids' in the same
   browser.
 - Portuguese (pt-BR, default) and English (en-US).

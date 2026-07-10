@@ -32,6 +32,30 @@ describe('share url', () => {
     expect(parsed).toEqual({ name: 'Carlos Becker', events })
   })
 
+  it('round-trips division snapshots without profile inputs', () => {
+    const data = {
+      name: 'Carlos Becker',
+      events,
+      divisions: [
+        {
+          age: 'master-3' as const,
+          weight: 'medium-heavy' as const,
+          uniform: 'gi' as const,
+        },
+        {
+          age: 'master-3' as const,
+          weight: 'heavy' as const,
+          uniform: 'no-gi' as const,
+        },
+      ],
+      ageDivisions: [{ date: '2026-01-01', ageDivision: 'master-3' as const }],
+    }
+    const parsed = parseShareHash(new URL(buildShareUrl(data)).hash)
+    expect(parsed).toEqual(data)
+    expect(parsed).not.toHaveProperty('birthYear')
+    expect(parsed).not.toHaveProperty('weight')
+  })
+
   it('rejects hashes without the payload marker', () => {
     expect(parseShareHash('')).toBeNull()
     expect(parseShareHash('#foo')).toBeNull()

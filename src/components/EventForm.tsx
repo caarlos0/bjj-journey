@@ -1,15 +1,26 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { beltAtDate, today } from '../describe'
+import {
+  divisionAt,
+  eligibleAgeDivisions,
+  WEIGHT_DIVISIONS,
+  weightDivisionOptions,
+} from '../divisions'
 import { useI18n } from '../i18n'
 import { EVENT_ICONS, RESULT_ICONS } from '../icons'
 import {
   ADULT_BELTS,
   KIDS_BELTS,
   maxStripes,
+  type AgeDivision,
+  type AthleteProfile,
   type BeltColor,
   type CompetitionResult,
   type EventType,
   type TimelineEvent,
+  type Uniform,
+  type WeightDivision,
+  type WeightUnit,
 } from '../types'
 
 const EVENT_TYPES: EventType[] = [
@@ -17,6 +28,7 @@ const EVENT_TYPES: EventType[] = [
   'school',
   'stripe',
   'belt',
+  'weight',
   'competition',
   'seminar',
   'injury',
@@ -29,6 +41,7 @@ export type PhotoChange = File | 'remove' | null
 
 interface EventFormProps {
   events: TimelineEvent[]
+  profile: AthleteProfile
   onSave: (event: TimelineEvent, photo: PhotoChange) => void
   editing: TimelineEvent | null
   editingPhotoUrl?: string
@@ -37,6 +50,7 @@ interface EventFormProps {
 
 export function EventForm({
   events,
+  profile,
   onSave,
   editing,
   editingPhotoUrl,
@@ -48,7 +62,12 @@ export function EventForm({
   const [school, setSchool] = useState('')
   const [belt, setBelt] = useState<BeltColor>('blue')
   const [stripe, setStripe] = useState(1)
+  const [weight, setWeight] = useState('')
+  const [weightUnit, setWeightUnit] = useState<WeightUnit>(profile.weightUnit)
   const [competitionName, setCompetitionName] = useState('')
+  const [uniform, setUniform] = useState<Uniform>(profile.uniforms[0])
+  const [ageDivision, setAgeDivision] = useState<AgeDivision | ''>('')
+  const [weightDivision, setWeightDivision] = useState<WeightDivision | ''>('')
   const [result, setResult] = useState<CompetitionResult>('gold')
   const [wins, setWins] = useState(0)
   const [instructor, setInstructor] = useState('')
@@ -58,24 +77,58 @@ export function EventForm({
 
   useEffect(() => {
     if (!editing) return
+    const editingUniform = editing.uniform ?? profile.uniforms[0]
+    const suggested = divisionAt(events, profile, editing.date, editingUniform)
     setType(editing.type)
     setDate(editing.date)
     setSchool(editing.school ?? '')
     setBelt(editing.belt ?? 'blue')
     setStripe(editing.stripe ?? 1)
+    setWeight(editing.weight?.toString() ?? '')
+    setWeightUnit(editing.weightUnit ?? profile.weightUnit)
     setCompetitionName(editing.competitionName ?? '')
+    setUniform(editingUniform)
+    setAgeDivision(editing.ageDivision ?? suggested?.age ?? '')
+    setWeightDivision(editing.weightDivision ?? suggested?.weight ?? '')
     setResult(editing.result ?? 'gold')
     setWins(editing.wins ?? 0)
     setInstructor(editing.instructor ?? '')
     setTitle(editing.title ?? '')
     setNotes(editing.notes ?? '')
     setPhoto(null)
-  }, [editing])
+  }, [editing, events, profile])
+
+  useEffect(() => {
+    if (editing) return
+    setWeightUnit(profile.weightUnit)
+    setUniform(profile.uniforms[0])
+  }, [editing, profile.uniforms, profile.weightUnit])
+
+  useEffect(() => {
+    if (type !== 'competition' || editing) return
+    const suggested = divisionAt(events, profile, date, uniform)
+    setAgeDivision(suggested?.age ?? '')
+    setWeightDivision(suggested?.weight ?? '')
+  }, [date, editing, events, profile, type, uniform])
 
   const stripeMax = maxStripes(beltAtDate(events, date))
+  const ageOptions = eligibleAgeDivisions(profile.birthYear, date)
+  const competitionAgeOptions =
+    ageDivision && !ageOptions.includes(ageDivision)
+      ? [...ageOptions, ageDivision]
+      : ageOptions
+  const weightOptions = ageDivision
+    ? weightDivisionOptions(ageDivision, profile.sex)
+    : WEIGHT_DIVISIONS
+  const competitionWeightOptions: WeightDivision[] = [...weightOptions, 'absolute']
+  if (weightDivision && !competitionWeightOptions.includes(weightDivision)) {
+    competitionWeightOptions.push(weightDivision)
+  }
+  const canClassify = competitionAgeOptions.length > 0 && !!profile.sex
 
   function reset() {
     setNotes('')
+    setWeight('')
     setCompetitionName('')
     setInstructor('')
     setTitle('')
@@ -93,8 +146,15 @@ export function EventForm({
     if (type === 'start' || type === 'school') event.school = school.trim() || undefined
     if (type === 'belt') event.belt = belt
     if (type === 'stripe') event.stripe = Math.min(stripe, stripeMax)
+    if (type === 'weight') {
+      event.weight = Number(weight)
+      event.weightUnit = weightUnit
+    }
     if (type === 'competition') {
       event.competitionName = competitionName.trim() || undefined
+      event.uniform = uniform
+      event.ageDivision = ageDivision || undefined
+      event.weightDivision = weightDivision || undefined
       event.result = result
       event.wins = wins > 0 ? wins : undefined
     }
@@ -188,6 +248,33 @@ export function EventForm({
         </label>
       )}
 
+      {type === 'weight' && (
+        <>
+          <label className="field">
+            <span>{t('form.weight')}</span>
+            <input
+              type="number"
+              required
+              min={0.1}
+              step={0.1}
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+            />
+          </label>
+          <label className="field">
+            <span>{t('profile.weightUnit')}</span>
+            <select
+              value={weightUnit}
+              onChange={(e) => setWeightUnit(e.target.value as WeightUnit)}
+            >
+              <option value="kg">kg</option>
+              <option value="lb">lb</option>
+            </select>
+            <small className="field-hint">{t('form.weightHint')}</small>
+          </label>
+        </>
+      )}
+
       {type === 'competition' && (
         <>
           <label className="field">
@@ -199,6 +286,55 @@ export function EventForm({
               onChange={(e) => setCompetitionName(e.target.value)}
             />
           </label>
+          <label className="field">
+            <span>{t('form.uniform')}</span>
+            <select
+              value={uniform}
+              onChange={(e) => setUniform(e.target.value as Uniform)}
+            >
+              <option value="gi">{t('division.uniform.gi')}</option>
+              <option value="no-gi">{t('division.uniform.no-gi')}</option>
+            </select>
+          </label>
+          {canClassify ? (
+            <>
+              <label className="field">
+                <span>{t('form.ageDivision')}</span>
+                <select
+                  required
+                  value={ageDivision}
+                  onChange={(e) => setAgeDivision(e.target.value as AgeDivision)}
+                >
+                  {competitionAgeOptions.map((division) => (
+                    <option key={division} value={division}>
+                      {t(`division.age.${division}`)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>{t('form.weightDivision')}</span>
+                <select
+                  required
+                  value={weightDivision}
+                  onChange={(e) =>
+                    setWeightDivision(e.target.value as WeightDivision)
+                  }
+                >
+                  <option value="" disabled>
+                    —
+                  </option>
+                  {competitionWeightOptions.map((division) => (
+                    <option key={division} value={division}>
+                      {t(`division.weight.${division}`)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </>
+          ) : (
+            <p className="form-hint">{t('form.divisionIncomplete')}</p>
+          )}
           <label className="field">
             <span>{t('form.result')}</span>
             <select

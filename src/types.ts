@@ -25,6 +25,8 @@ export type EventType =
   | 'school'
   | 'stripe'
   | 'belt'
+  | 'weight'
+  | 'age'
   | 'competition'
   | 'injury'
   | 'break'
@@ -32,6 +34,64 @@ export type EventType =
   | 'milestone'
 
 export type CompetitionResult = 'gold' | 'silver' | 'bronze' | 'participated'
+
+export type Sex = 'male' | 'female'
+export type WeightUnit = 'kg' | 'lb'
+export type Uniform = 'gi' | 'no-gi'
+
+export type AgeDivision =
+  | 'mighty-mite-1'
+  | 'mighty-mite-2'
+  | 'mighty-mite-3'
+  | 'pee-wee-1'
+  | 'pee-wee-2'
+  | 'pee-wee-3'
+  | 'junior-1'
+  | 'junior-2'
+  | 'junior-3'
+  | 'teen-1'
+  | 'teen-2'
+  | 'teen-3'
+  | 'juvenile'
+  | 'adult'
+  | 'master-1'
+  | 'master-2'
+  | 'master-3'
+  | 'master-4'
+  | 'master-5'
+  | 'master-6'
+  | 'master-7'
+
+export type WeightClass =
+  | 'rooster'
+  | 'light-feather'
+  | 'feather'
+  | 'light'
+  | 'middle'
+  | 'medium-heavy'
+  | 'heavy'
+  | 'super-heavy'
+  | 'ultra-heavy'
+
+export type WeightDivision = WeightClass | 'absolute'
+
+export interface AthleteProfile {
+  birthYear?: number
+  sex?: Sex
+  weightUnit: WeightUnit
+  uniforms: Uniform[]
+}
+
+export interface DivisionSnapshot {
+  age: AgeDivision
+  weight?: WeightDivision
+  uniform: Uniform
+}
+
+export interface AgeDivisionChange {
+  date: string
+  ageDivision: AgeDivision
+}
 
 export interface TimelineEvent {
   id: string
@@ -43,6 +103,11 @@ export interface TimelineEvent {
   competitionName?: string
   result?: CompetitionResult
   wins?: number
+  weight?: number
+  weightUnit?: WeightUnit
+  uniform?: Uniform
+  ageDivision?: AgeDivision
+  weightDivision?: WeightDivision
   instructor?: string // seminar
   title?: string // milestone
   notes?: string

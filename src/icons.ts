@@ -5,6 +5,8 @@ export const EVENT_ICONS: Record<EventType, string> = {
   school: '🏫',
   stripe: '🎖️',
   belt: '🥇',
+  weight: '⚖️',
+  age: '🎂',
   competition: '🏆',
   injury: '🤕',
   break: '⏸️',

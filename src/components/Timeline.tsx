@@ -1,9 +1,15 @@
 import { forwardRef, useMemo } from 'react'
 import { beltsThrough, describeEvent, restartFlags, sortByDate } from '../describe'
+import { formatDivision, formatDivisions } from '../divisions'
 import { useI18n } from '../i18n'
 import { EVENT_ICONS, RESULT_ICONS } from '../icons'
 import { computeStats, formatWins, matTime } from '../stats'
-import { BELT_STYLES, type TimelineEvent } from '../types'
+import {
+  BELT_STYLES,
+  type AgeDivisionChange,
+  type DivisionSnapshot,
+  type TimelineEvent,
+} from '../types'
 import { Belt } from './Belt'
 import { BeltStrip } from './BeltStrip'
 import { StatChips } from './StatChips'
@@ -11,16 +17,34 @@ import { StatChips } from './StatChips'
 interface TimelineProps {
   events: TimelineEvent[]
   name: string
+  divisions?: DivisionSnapshot[]
+  ageDivisions?: AgeDivisionChange[]
   photos?: Record<string, string>
 }
 
 export const Timeline = forwardRef<HTMLDivElement, TimelineProps>(
-  function Timeline({ events, name, photos = {} }, ref) {
+  function Timeline(
+    { events, name, divisions = [], ageDivisions = [], photos = {} },
+    ref,
+  ) {
     const { t, formatDate } = useI18n()
-    const sorted = useMemo(() => sortByDate(events), [events])
+    const derivedAgeEvents = useMemo<TimelineEvent[]>(
+      () =>
+        ageDivisions.map((change) => ({
+          id: `age:${change.date}:${change.ageDivision}`,
+          type: 'age',
+          date: change.date,
+          ageDivision: change.ageDivision,
+        })),
+      [ageDivisions],
+    )
+    const sorted = useMemo(
+      () => sortByDate([...events, ...derivedAgeEvents]),
+      [events, derivedAgeEvents],
+    )
     const belts = useMemo(() => beltsThrough(sorted), [sorted])
     const restarts = useMemo(() => restartFlags(sorted), [sorted])
-    const stats = useMemo(() => computeStats(sorted), [sorted])
+    const stats = useMemo(() => computeStats(events), [events])
 
     if (sorted.length === 0) {
       return (
@@ -34,7 +58,7 @@ export const Timeline = forwardRef<HTMLDivElement, TimelineProps>(
       )
     }
 
-    const duration = matTime(sorted, t)
+    const duration = matTime(events, t)
 
     return (
       <div className="timeline-card" ref={ref}>
@@ -42,6 +66,15 @@ export const Timeline = forwardRef<HTMLDivElement, TimelineProps>(
           <BeltStrip className="timeline-header-belt" />
           <h2>{t('tl.title')}</h2>
           {name && <p className="timeline-name">{name}</p>}
+          {divisions.length > 0 && (
+            <div className="timeline-divisions">
+              {formatDivisions(divisions, t).map((division) => (
+                <p key={division} className="timeline-division">
+                  {division}
+                </p>
+              ))}
+            </div>
+          )}
           {duration && <p className="timeline-duration">{duration}</p>}
           <div className="timeline-current-belt">
             <Belt
@@ -56,12 +89,25 @@ export const Timeline = forwardRef<HTMLDivElement, TimelineProps>(
         <ol className="timeline">
           {sorted.map((event, i) => {
             const belt = belts[i]
+            const competitionDivision =
+              event.type === 'competition' && event.ageDivision && event.uniform
+                ? {
+                    age: event.ageDivision,
+                    weight: event.weightDivision,
+                    uniform: event.uniform,
+                  }
+                : null
             const dotColor =
               event.type === 'belt' && event.belt
                 ? BELT_STYLES[event.belt].base
                 : BELT_STYLES[belt].base
             return (
-              <li key={event.id} className="timeline-item">
+              <li
+                key={event.id}
+                className={`timeline-item ${
+                  event.type === 'age' ? 'timeline-item-derived' : ''
+                }`}
+              >
                 <span
                   className="timeline-dot"
                   style={{ backgroundColor: dotColor }}
@@ -84,8 +130,15 @@ export const Timeline = forwardRef<HTMLDivElement, TimelineProps>(
                   )}
                   {event.type === 'competition' && (
                     <p className="timeline-sub">
-                      {event.result && t(`result.${event.result}`)}
-                      {event.wins ? ` · ${formatWins(event.wins, t)}` : ''}
+                      {[
+                        competitionDivision
+                          ? formatDivision(competitionDivision, t)
+                          : '',
+                        event.result ? t(`result.${event.result}`) : '',
+                        event.wins ? formatWins(event.wins, t) : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
                     </p>
                   )}
                   {event.notes && <p className="timeline-notes">{event.notes}</p>}

@@ -3,9 +3,11 @@ import {
   initProfiles,
   loadEvents,
   loadName,
+  loadProfile,
   removeProfileData,
   saveEvents,
   saveName,
+  saveProfile,
 } from './storage'
 import type { TimelineEvent } from './types'
 
@@ -51,9 +53,17 @@ describe('per-profile storage', () => {
     saveEvents('a', events)
     saveName('a', 'Carlos')
     saveName('b', 'Kiddo')
+    saveProfile('a', {
+      birthYear: 1985,
+      sex: 'male',
+      weightUnit: 'kg',
+      uniforms: ['gi', 'no-gi'],
+    })
     expect(loadEvents('a')).toEqual(events)
     expect(loadEvents('b')).toEqual([])
     expect(loadName('b')).toBe('Kiddo')
+    expect(loadProfile('a').birthYear).toBe(1985)
+    expect(loadProfile('b')).toEqual({ weightUnit: 'kg', uniforms: ['gi'] })
   })
 
   it('removes profile data', () => {
@@ -62,10 +72,13 @@ describe('per-profile storage', () => {
     removeProfileData('a')
     expect(loadEvents('a')).toEqual([])
     expect(loadName('a')).toBe('')
+    expect(loadProfile('a')).toEqual({ weightUnit: 'kg', uniforms: ['gi'] })
   })
 
   it('survives corrupted json', () => {
     localStorage.setItem('bjjourney:a:events', '{not json')
+    localStorage.setItem('bjjourney:a:profile', '{not json')
     expect(loadEvents('a')).toEqual([])
+    expect(loadProfile('a')).toEqual({ weightUnit: 'kg', uniforms: ['gi'] })
   })
 })
