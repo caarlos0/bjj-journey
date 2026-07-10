@@ -165,9 +165,6 @@ const dict = {
     'export.full': 'Full timeline',
     'export.story': 'Story (9:16)',
     'export.square': 'Square (1:1)',
-    'export.instagram': 'Instagram Story',
-    'export.instagramHint':
-      'Builds the 9:16 story image and opens your share sheet — pick Instagram, then Story. (The web can’t drop it into Instagram automatically.)',
     'backup.title': 'Backup',
     'backup.download': 'Download backup',
     'backup.restore': 'Restore backup',
@@ -345,9 +342,6 @@ const dict = {
     'export.full': 'Linha do tempo',
     'export.story': 'Story (9:16)',
     'export.square': 'Quadrado (1:1)',
-    'export.instagram': 'Story do Instagram',
-    'export.instagramHint':
-      'Gera a imagem 9:16 e abre o compartilhamento — escolha o Instagram e depois Story. (A web não consegue jogar direto no Instagram.)',
     'backup.title': 'Backup',
     'backup.download': 'Baixar backup',
     'backup.restore': 'Restaurar backup',

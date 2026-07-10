@@ -302,13 +302,6 @@ export default function App() {
                 <button type="button" onClick={handleShareLink}>
                   {copied ? `✅ ${t('share.copied')}` : `🔗 ${t('share.button')}`}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => pickExport('story')}
-                  title={t('export.instagramHint')}
-                >
-                  📸 {t('export.instagram')}
-                </button>
                 <div className="export-menu-sep" />
                 <button type="button" onClick={() => pickExport('full')}>
                   📜 {t('export.full')}
