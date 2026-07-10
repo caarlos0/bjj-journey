@@ -61,10 +61,11 @@ export function normalizeProfile(value: unknown): AthleteProfile {
   if (!value || typeof value !== 'object') return { ...DEFAULT_PROFILE }
   const profile = value as Record<string, unknown>
   const birthYear =
+    typeof profile.birthYear === 'number' &&
     Number.isInteger(profile.birthYear) &&
-    Number(profile.birthYear) >= 1900 &&
-    Number(profile.birthYear) <= new Date().getFullYear()
-      ? Number(profile.birthYear)
+    profile.birthYear >= 1900 &&
+    profile.birthYear <= new Date().getFullYear()
+      ? profile.birthYear
       : undefined
   const sex = profile.sex === 'male' || profile.sex === 'female' ? profile.sex : undefined
   const weightUnit = profile.weightUnit === 'lb' ? 'lb' : 'kg'
@@ -333,15 +334,16 @@ export function formatDivisions(
   divisions: DivisionSnapshot[],
   t: T,
 ): string[] {
+  const [first, second] = divisions
   if (
     divisions.length === 2 &&
-    divisions[0].age === divisions[1].age &&
-    divisions[0].weight === divisions[1].weight &&
-    divisions[0].uniform !== divisions[1].uniform
+    first.age === second.age &&
+    first.weight === second.weight &&
+    first.uniform !== second.uniform
   ) {
-    const parts = [formatAgeDivision(divisions[0].age, t)]
-    if (divisions[0].weight) {
-      parts.push(t(`division.weight.${divisions[0].weight}` as TKey))
+    const parts = [formatAgeDivision(first.age, t)]
+    if (first.weight) {
+      parts.push(t(`division.weight.${first.weight}` as TKey))
     }
     parts.push(t('division.uniform.both'))
     return [parts.join(' · ')]

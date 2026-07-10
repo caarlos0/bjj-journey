@@ -177,8 +177,9 @@ export default function App() {
   }
 
   function toggleUniform(uniform: Uniform) {
-    if (profile.uniforms.includes(uniform) && profile.uniforms.length === 1) return
-    const selected = profile.uniforms.includes(uniform)
+    const isSelected = profile.uniforms.includes(uniform)
+    if (isSelected && profile.uniforms.length === 1) return
+    const selected = isSelected
       ? profile.uniforms.filter((current) => current !== uniform)
       : [...profile.uniforms, uniform]
     const uniforms = (['gi', 'no-gi'] as const).filter((current) =>
