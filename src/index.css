@@ -357,11 +357,6 @@ input[type='number']::-webkit-outer-spin-button {
   color: var(--accent);
 }
 
-.export-menu-sep {
-  border-top: 1px solid var(--border);
-  margin: 4px 0;
-}
-
 .offscreen {
   left: -12000px;
   position: fixed;

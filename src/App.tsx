@@ -52,7 +52,6 @@ export default function App() {
   )
   const [editing, setEditing] = useState<TimelineEvent | null>(null)
   const { photoUrls, reloadPhotos } = usePhotos()
-  const timelineRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
   const shareWrapRef = useRef<HTMLDivElement>(null)
   const [shareMenu, setShareMenu] = useState(false)
@@ -225,17 +224,6 @@ export default function App() {
     link.click()
   }
 
-  async function exportTimeline() {
-    const node = timelineRef.current
-    if (!node || exporting) return
-    setExporting(true)
-    try {
-      await deliverPng(await capture(node, 2))
-    } finally {
-      setExporting(false)
-    }
-  }
-
   // The summary card renders off-screen; capture it on the frame after
   // it mounts.
   useEffect(() => {
@@ -257,14 +245,10 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cardFormat])
 
-  function pickExport(format: CardFormat | 'full') {
+  function pickExport(format: CardFormat) {
     setShareMenu(false)
-    if (format === 'full') {
-      void exportTimeline()
-    } else {
-      setExporting(true)
-      setCardFormat(format)
-    }
+    setExporting(true)
+    setCardFormat(format)
   }
 
   return (
@@ -301,10 +285,6 @@ export default function App() {
               <div className="export-menu">
                 <button type="button" onClick={handleShareLink}>
                   {copied ? `✅ ${t('share.copied')}` : `🔗 ${t('share.button')}`}
-                </button>
-                <div className="export-menu-sep" />
-                <button type="button" onClick={() => pickExport('full')}>
-                  📜 {t('export.full')}
                 </button>
                 <button type="button" onClick={() => pickExport('story')}>
                   📱 {t('export.story')}
@@ -433,7 +413,6 @@ export default function App() {
 
         <section className="panel panel-right">
           <Timeline
-            ref={timelineRef}
             events={viewEvents}
             name={viewName}
             divisions={viewDivisions}
