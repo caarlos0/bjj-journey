@@ -2,12 +2,12 @@ import { describe, expect, it } from 'vitest'
 import {
   ageDivisionChanges,
   ageDivisionForYear,
-  convertWeight,
   divisionAt,
   eligibleAgeDivisions,
   formatDivision,
   formatDivisions,
   normalizeProfile,
+  uniformsAtDate,
   weightAtDate,
   weightDivisionFor,
 } from './divisions'
@@ -20,8 +20,6 @@ const t = (key: TKey, vars?: Record<string, string | number>) =>
 const profile: AthleteProfile = {
   birthYear: 1985,
   sex: 'male',
-  weightUnit: 'kg',
-  uniforms: ['gi'],
 }
 
 const weight = (
@@ -37,13 +35,16 @@ const weight = (
 })
 
 describe('IBJJF age divisions', () => {
-  it('defaults profiles to Gi and keeps selected uniforms in Gi-first order', () => {
-    expect(normalizeProfile(null).uniforms).toEqual(['gi'])
-    expect(normalizeProfile({ uniform: 'no-gi' }).uniforms).toEqual(['no-gi'])
-    expect(normalizeProfile({ uniforms: ['no-gi', 'gi'] }).uniforms).toEqual([
-      'gi',
-      'no-gi',
-    ])
+  it('keeps only profile identity fields', () => {
+    expect(normalizeProfile(null)).toEqual({})
+    expect(
+      normalizeProfile({
+        birthYear: 1985,
+        sex: 'male',
+        weightUnit: 'lb',
+        uniforms: ['no-gi'],
+      }),
+    ).toEqual({ birthYear: 1985, sex: 'male' })
   })
 
   it('uses birth year across kids, juvenile, adult, and master boundaries', () => {
@@ -114,11 +115,6 @@ describe('IBJJF weight divisions', () => {
     ).toHaveLength(2)
   })
 
-  it('converts displayed weights when the preferred unit changes', () => {
-    expect(convertWeight(80, 'kg', 'lb')).toBe(176.4)
-    expect(convertWeight(176.4, 'lb', 'kg')).toBe(80)
-  })
-
   it('uses the published adult Gi limits in both units', () => {
     expect(weightDivisionFor(57.5, 'kg', 'adult', 'male', 'gi')).toBe('rooster')
     expect(weightDivisionFor(57.6, 'kg', 'adult', 'male', 'gi')).toBe(
@@ -162,6 +158,49 @@ describe('dated divisions', () => {
     expect(weightAtDate(events, '2024-01-01')).toEqual({ weight: 80, unit: 'kg' })
     expect(weightAtDate(events, '2026-01-01')).toEqual({ weight: 88, unit: 'kg' })
     expect(weightAtDate(events, '2022-01-01')).toBeNull()
+  })
+
+  it('uses an initial weight stored on the first start event', () => {
+    expect(
+      weightAtDate(
+        [
+          {
+            id: 'start',
+            type: 'start',
+            date: '2020-01-01',
+            weight: 75,
+            weightUnit: 'kg',
+          },
+        ],
+        '2020-01-01',
+      ),
+    ).toEqual({ weight: 75, unit: 'kg' })
+  })
+
+  it('derives uniforms from start and uniform-change events', () => {
+    const uniformEvents: TimelineEvent[] = [
+      {
+        id: 'start',
+        type: 'start',
+        date: '2020-01-01',
+        uniforms: ['gi'],
+      },
+      {
+        id: 'both',
+        type: 'uniform',
+        date: '2022-01-01',
+        uniforms: ['no-gi', 'gi'],
+      },
+      {
+        id: 'nogi',
+        type: 'uniform',
+        date: '2024-01-01',
+        uniforms: ['no-gi'],
+      },
+    ]
+    expect(uniformsAtDate(uniformEvents, '2019-01-01')).toEqual(['gi'])
+    expect(uniformsAtDate(uniformEvents, '2023-01-01')).toEqual(['gi', 'no-gi'])
+    expect(uniformsAtDate(uniformEvents, '2025-01-01')).toEqual(['no-gi'])
   })
 
   it('ignores malformed imported weight units', () => {

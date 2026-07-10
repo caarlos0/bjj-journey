@@ -1,5 +1,5 @@
 import type { TKey } from './i18n'
-import { formatAgeDivision } from './divisions'
+import { formatAgeDivision, formatUniforms } from './divisions'
 import type { BeltColor, TimelineEvent } from './types'
 
 type T = (key: TKey, vars?: Record<string, string | number>) => string
@@ -78,6 +78,10 @@ export function describeEvent(
       return t('tl.weight', {
         weight: event.weight ?? '?',
         unit: event.weightUnit ?? '',
+      })
+    case 'uniform':
+      return t('tl.uniforms', {
+        uniforms: formatUniforms(event.uniforms ?? ['gi'], t),
       })
     case 'age':
       return event.ageDivision

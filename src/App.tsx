@@ -8,10 +8,9 @@ import { Timeline } from './components/Timeline'
 import { today } from './describe'
 import {
   ageDivisionChanges,
-  convertWeight,
   divisionAt,
   formatDivisions,
-  weightAtDate,
+  uniformsAtDate,
 } from './divisions'
 import { useI18n, type Lang } from './i18n'
 import { dataUrlToBlob, deletePhoto, putPhoto, resizeImage } from './photos'
@@ -34,13 +33,7 @@ import {
   parseShareHash,
   type SharedData,
 } from './share'
-import type {
-  AthleteProfile,
-  Sex,
-  TimelineEvent,
-  Uniform,
-  WeightUnit,
-} from './types'
+import type { AthleteProfile, TimelineEvent } from './types'
 
 export default function App() {
   const { t, lang, setLang } = useI18n()
@@ -52,12 +45,6 @@ export default function App() {
   )
   const [name, setName] = useState(() => loadName(initial.active))
   const [profile, setProfile] = useState(() => loadProfile(initial.active))
-  const [currentWeightInput, setCurrentWeightInput] = useState(() => {
-    const measured = weightAtDate(events, today())
-    return measured
-      ? String(convertWeight(measured.weight, measured.unit, profile.weightUnit))
-      : ''
-  })
   const [exporting, setExporting] = useState(false)
   const [copied, setCopied] = useState(false)
   const [shared, setShared] = useState<SharedData | null>(() =>
@@ -89,12 +76,9 @@ export default function App() {
 
   const viewEvents = shared ? shared.events : events
   const viewName = shared ? shared.name : name
-  const currentWeight = weightAtDate(events, today())
-  const displayedWeight = currentWeight
-    ? convertWeight(currentWeight.weight, currentWeight.unit, profile.weightUnit)
-    : ''
-  const currentDivisions = profile.uniforms.flatMap((uniform) => {
-    const division = divisionAt(events, profile, today(), uniform)
+  const currentDate = today()
+  const currentDivisions = uniformsAtDate(events, currentDate).flatMap((uniform) => {
+    const division = divisionAt(events, profile, currentDate, uniform)
     return division ? [division] : []
   })
   const firstEventDate =
@@ -107,10 +91,6 @@ export default function App() {
   const localAgeDivisions = ageDivisionChanges(profile.birthYear, firstEventDate)
   const viewDivisions = shared ? (shared.divisions ?? []) : currentDivisions
   const viewAgeDivisions = shared ? (shared.ageDivisions ?? []) : localAgeDivisions
-
-  useEffect(() => {
-    setCurrentWeightInput(String(displayedWeight))
-  }, [active, displayedWeight])
 
   function updateEvents(next: TimelineEvent[]) {
     setEvents(next)
@@ -174,44 +154,6 @@ export default function App() {
   function handleProfile(value: AthleteProfile) {
     setProfile(value)
     saveProfile(active, value)
-  }
-
-  function toggleUniform(uniform: Uniform) {
-    const isSelected = profile.uniforms.includes(uniform)
-    if (isSelected && profile.uniforms.length === 1) return
-    const selected = isSelected
-      ? profile.uniforms.filter((current) => current !== uniform)
-      : [...profile.uniforms, uniform]
-    const uniforms = (['gi', 'no-gi'] as const).filter((current) =>
-      selected.includes(current),
-    )
-    handleProfile({ ...profile, uniforms })
-  }
-
-  function handleCurrentWeight() {
-    const weight = Number(currentWeightInput)
-    if (!Number.isFinite(weight) || weight <= 0) {
-      setCurrentWeightInput(String(displayedWeight))
-      return
-    }
-    if (weight === displayedWeight) return
-    const date = today()
-    const existing = [...events]
-      .reverse()
-      .find((event) => event.type === 'weight' && event.date === date)
-    const event: TimelineEvent = {
-      ...existing,
-      id: existing?.id ?? crypto.randomUUID(),
-      type: 'weight',
-      date,
-      weight,
-      weightUnit: profile.weightUnit,
-    }
-    updateEvents(
-      existing
-        ? events.map((current) => (current.id === existing.id ? event : current))
-        : [...events, event],
-    )
   }
 
   async function restoreBackup(data: BackupData) {
@@ -454,96 +396,6 @@ export default function App() {
               />
             </label>
 
-            <div className="profile-details">
-              <label className="field">
-                <span>{t('profile.birthYear')}</span>
-                <input
-                  type="number"
-                  min={1900}
-                  max={new Date().getFullYear() - 4}
-                  value={profile.birthYear ?? ''}
-                  onChange={(e) =>
-                    handleProfile({
-                      ...profile,
-                      birthYear: e.target.value
-                        ? Number(e.target.value)
-                        : undefined,
-                    })
-                  }
-                />
-                <small className="field-hint">{t('profile.birthYearHint')}</small>
-              </label>
-
-              <label className="field">
-                <span>{t('profile.sex')}</span>
-                <select
-                  value={profile.sex ?? ''}
-                  onChange={(e) =>
-                    handleProfile({
-                      ...profile,
-                      sex: (e.target.value as Sex) || undefined,
-                    })
-                  }
-                >
-                  <option value="">{t('profile.sexPlaceholder')}</option>
-                  <option value="male">{t('profile.sex.male')}</option>
-                  <option value="female">{t('profile.sex.female')}</option>
-                </select>
-              </label>
-
-              <label className="field">
-                <span>
-                  {t('profile.currentWeight', { unit: profile.weightUnit })}
-                </span>
-                <input
-                  type="number"
-                  min={0.1}
-                  step={0.1}
-                  value={currentWeightInput}
-                  onChange={(e) => setCurrentWeightInput(e.target.value)}
-                  onBlur={handleCurrentWeight}
-                />
-                <small className="field-hint">
-                  {t('profile.currentWeightHint')}
-                </small>
-              </label>
-
-              <label className="field">
-                <span>{t('profile.weightUnit')}</span>
-                <select
-                  value={profile.weightUnit}
-                  onChange={(e) =>
-                    handleProfile({
-                      ...profile,
-                      weightUnit: e.target.value as WeightUnit,
-                    })
-                  }
-                >
-                  <option value="kg">kg</option>
-                  <option value="lb">lb</option>
-                </select>
-              </label>
-
-              <label className="field">
-                <span>{t('profile.uniform')}</span>
-                <div className="uniform-picker" role="group">
-                  {(['gi', 'no-gi'] as const).map((uniform) => (
-                    <button
-                      key={uniform}
-                      type="button"
-                      className={`type-option uniform-option ${
-                        profile.uniforms.includes(uniform) ? 'selected' : ''
-                      }`}
-                      aria-pressed={profile.uniforms.includes(uniform)}
-                      onClick={() => toggleUniform(uniform)}
-                    >
-                      {t(`division.uniform.${uniform}`)}
-                    </button>
-                  ))}
-                </div>
-              </label>
-            </div>
-
             <div className="profile-divisions">
               {formatDivisions(currentDivisions, t).map((division) => (
                 <p key={division} className="profile-division">
@@ -556,6 +408,7 @@ export default function App() {
             <EventForm
               events={events}
               profile={profile}
+              onProfileChange={handleProfile}
               onSave={(event, photo) => void saveEvent(event, photo)}
               editing={editing}
               editingPhotoUrl={editing ? photoUrls[editing.id] : undefined}

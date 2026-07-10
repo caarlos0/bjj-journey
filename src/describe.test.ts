@@ -127,6 +127,16 @@ describe('describeEvent', () => {
       ),
     ).toBe('tl.ageDivision[division.age.master-3]')
   })
+
+  it('describes uniform changes', () => {
+    expect(
+      describeEvent(
+        ev({ type: 'uniform', uniforms: ['gi', 'no-gi'] }),
+        'blue',
+        t,
+      ),
+    ).toBe('tl.uniforms[division.uniform.both]')
+  })
 })
 
 describe('restartFlags', () => {
@@ -152,8 +162,9 @@ describe('restartFlags', () => {
       ev({ type: 'break', date: '2025-01-01' }),
       ev({ type: 'age', ageDivision: 'master-3', date: '2026-01-01' }),
       ev({ type: 'weight', weight: 88, weightUnit: 'kg', date: '2026-02-01' }),
+      ev({ type: 'uniform', uniforms: ['gi', 'no-gi'], date: '2026-02-15' }),
       ev({ type: 'start', date: '2026-03-01' }),
     ])
-    expect(restartFlags(sorted)).toEqual([false, false, false, true])
+    expect(restartFlags(sorted)).toEqual([false, false, false, false, true])
   })
 })

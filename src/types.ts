@@ -26,6 +26,7 @@ export type EventType =
   | 'stripe'
   | 'belt'
   | 'weight'
+  | 'uniform'
   | 'age'
   | 'competition'
   | 'injury'
@@ -78,8 +79,6 @@ export type WeightDivision = WeightClass | 'absolute'
 export interface AthleteProfile {
   birthYear?: number
   sex?: Sex
-  weightUnit: WeightUnit
-  uniforms: Uniform[]
 }
 
 export interface DivisionSnapshot {
@@ -106,6 +105,7 @@ export interface TimelineEvent {
   weight?: number
   weightUnit?: WeightUnit
   uniform?: Uniform
+  uniforms?: Uniform[]
   ageDivision?: AgeDivision
   weightDivision?: WeightDivision
   instructor?: string // seminar

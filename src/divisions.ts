@@ -14,11 +14,6 @@ import type {
 type T = (key: TKey, vars?: Record<string, string | number>) => string
 type Limits = Record<Uniform, Record<WeightUnit, Record<Sex, readonly number[]>>>
 
-const DEFAULT_PROFILE: AthleteProfile = {
-  weightUnit: 'kg',
-  uniforms: ['gi'],
-}
-
 export const AGE_DIVISIONS: AgeDivision[] = [
   'mighty-mite-1',
   'mighty-mite-2',
@@ -58,7 +53,7 @@ export const WEIGHT_DIVISIONS: WeightClass[] = [
 const FEMALE_WEIGHT_DIVISIONS = WEIGHT_DIVISIONS.slice(0, -1)
 
 export function normalizeProfile(value: unknown): AthleteProfile {
-  if (!value || typeof value !== 'object') return { ...DEFAULT_PROFILE }
+  if (!value || typeof value !== 'object') return {}
   const profile = value as Record<string, unknown>
   const birthYear =
     typeof profile.birthYear === 'number' &&
@@ -68,19 +63,7 @@ export function normalizeProfile(value: unknown): AthleteProfile {
       ? profile.birthYear
       : undefined
   const sex = profile.sex === 'male' || profile.sex === 'female' ? profile.sex : undefined
-  const weightUnit = profile.weightUnit === 'lb' ? 'lb' : 'kg'
-  const requestedUniforms = Array.isArray(profile.uniforms)
-    ? profile.uniforms
-    : [profile.uniform]
-  const uniforms = (['gi', 'no-gi'] as const).filter((uniform) =>
-    requestedUniforms.includes(uniform),
-  )
-  return {
-    birthYear,
-    sex,
-    weightUnit,
-    uniforms: uniforms.length > 0 ? uniforms : ['gi'],
-  }
+  return { birthYear, sex }
 }
 
 const ADULT_LIMITS: Limits = {
@@ -276,7 +259,7 @@ export function weightAtDate(
   let latest: { date: string; weight: number; unit: WeightUnit } | null = null
   for (const event of events) {
     if (
-      event.type === 'weight' &&
+      (event.type === 'weight' || event.type === 'start') &&
       event.date <= date &&
       typeof event.weight === 'number' &&
       event.weight > 0 &&
@@ -293,21 +276,29 @@ export function weightAtDate(
   return latest ? { weight: latest.weight, unit: latest.unit } : null
 }
 
-export function convertWeight(
-  weight: number,
-  from: WeightUnit,
-  to: WeightUnit,
-): number {
-  if (from === to) return weight
-  const converted = from === 'kg' ? weight * 2.2046226218 : weight / 2.2046226218
-  return Math.round(converted * 10) / 10
+export function uniformsAtDate(events: TimelineEvent[], date: string): Uniform[] {
+  let latest: { date: string; uniforms: Uniform[] } | null = null
+  for (const event of events) {
+    if (
+      (event.type === 'start' || event.type === 'uniform') &&
+      event.date <= date &&
+      Array.isArray(event.uniforms) &&
+      (!latest || event.date >= latest.date)
+    ) {
+      const uniforms = (['gi', 'no-gi'] as const).filter((uniform) =>
+        event.uniforms?.includes(uniform),
+      )
+      if (uniforms.length > 0) latest = { date: event.date, uniforms }
+    }
+  }
+  return latest?.uniforms ?? ['gi']
 }
 
 export function divisionAt(
   events: TimelineEvent[],
   profile: AthleteProfile,
   date: string,
-  uniform = profile.uniforms[0],
+  uniform = uniformsAtDate(events, date)[0],
 ): DivisionSnapshot | null {
   const age = ageDivisionAtDate(profile.birthYear, date)
   if (!age) return null
@@ -330,6 +321,12 @@ export function formatDivision(division: DivisionSnapshot, t: T): string {
   return parts.join(' · ')
 }
 
+export function formatUniforms(uniforms: Uniform[], t: T): string {
+  return uniforms.length === 2
+    ? t('division.uniform.both')
+    : t(`division.uniform.${uniforms[0] ?? 'gi'}` as TKey)
+}
+
 export function formatDivisions(
   divisions: DivisionSnapshot[],
   t: T,
@@ -345,7 +342,7 @@ export function formatDivisions(
     if (first.weight) {
       parts.push(t(`division.weight.${first.weight}` as TKey))
     }
-    parts.push(t('division.uniform.both'))
+    parts.push(formatUniforms(['gi', 'no-gi'], t))
     return [parts.join(' · ')]
   }
   return divisions.map((division) => formatDivision(division, t))

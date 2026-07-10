@@ -3,7 +3,9 @@ import { beltAtDate, today } from '../describe'
 import {
   divisionAt,
   eligibleAgeDivisions,
+  uniformsAtDate,
   WEIGHT_DIVISIONS,
+  weightAtDate,
   weightDivisionOptions,
 } from '../divisions'
 import { useI18n } from '../i18n'
@@ -17,6 +19,7 @@ import {
   type BeltColor,
   type CompetitionResult,
   type EventType,
+  type Sex,
   type TimelineEvent,
   type Uniform,
   type WeightDivision,
@@ -29,6 +32,7 @@ const EVENT_TYPES: EventType[] = [
   'stripe',
   'belt',
   'weight',
+  'uniform',
   'competition',
   'seminar',
   'injury',
@@ -42,6 +46,7 @@ export type PhotoChange = File | 'remove' | null
 interface EventFormProps {
   events: TimelineEvent[]
   profile: AthleteProfile
+  onProfileChange: (profile: AthleteProfile) => void
   onSave: (event: TimelineEvent, photo: PhotoChange) => void
   editing: TimelineEvent | null
   editingPhotoUrl?: string
@@ -51,21 +56,29 @@ interface EventFormProps {
 export function EventForm({
   events,
   profile,
+  onProfileChange,
   onSave,
   editing,
   editingPhotoUrl,
   onCancelEdit,
 }: EventFormProps) {
   const { t } = useI18n()
-  const [type, setType] = useState<EventType>('start')
-  const [date, setDate] = useState(today())
+  const [type, setType] = useState<EventType | ''>('start')
+  const [date, setDate] = useState(today)
   const [school, setSchool] = useState('')
   const [belt, setBelt] = useState<BeltColor>('blue')
   const [stripe, setStripe] = useState(1)
   const [weight, setWeight] = useState('')
-  const [weightUnit, setWeightUnit] = useState<WeightUnit>(profile.weightUnit)
+  const [weightUnit, setWeightUnit] = useState<WeightUnit>(
+    () => weightAtDate(events, date)?.unit ?? 'kg',
+  )
+  const [uniforms, setUniforms] = useState<Uniform[]>(() =>
+    uniformsAtDate(events, date),
+  )
+  const [birthYear, setBirthYear] = useState(profile.birthYear?.toString() ?? '')
+  const [sex, setSex] = useState<Sex | ''>(profile.sex ?? '')
   const [competitionName, setCompetitionName] = useState('')
-  const [uniform, setUniform] = useState<Uniform>(profile.uniforms[0])
+  const [uniform, setUniform] = useState<Uniform>(uniforms[0])
   const [ageDivision, setAgeDivision] = useState<AgeDivision | ''>('')
   const [weightDivision, setWeightDivision] = useState<WeightDivision | ''>('')
   const [result, setResult] = useState<CompetitionResult>('gold')
@@ -74,10 +87,22 @@ export function EventForm({
   const [title, setTitle] = useState('')
   const [notes, setNotes] = useState('')
   const [photo, setPhoto] = useState<PhotoChange>(null)
+  const earliestOtherStart = events
+    .filter((event) => event.type === 'start' && event.id !== editing?.id)
+    .reduce<TimelineEvent | null>(
+      (earliest, event) =>
+        !earliest || event.date < earliest.date ? event : earliest,
+      null,
+    )
+  const isFirstStart =
+    type === 'start' &&
+    (!earliestOtherStart ||
+      (editing ? date <= earliestOtherStart.date : date < earliestOtherStart.date))
 
   useEffect(() => {
     if (!editing) return
-    const editingUniform = editing.uniform ?? profile.uniforms[0]
+    const editingUniforms = editing.uniforms ?? uniformsAtDate(events, editing.date)
+    const editingUniform = editing.uniform ?? editingUniforms[0]
     const suggested = divisionAt(events, profile, editing.date, editingUniform)
     setType(editing.type)
     setDate(editing.date)
@@ -85,7 +110,12 @@ export function EventForm({
     setBelt(editing.belt ?? 'blue')
     setStripe(editing.stripe ?? 1)
     setWeight(editing.weight?.toString() ?? '')
-    setWeightUnit(editing.weightUnit ?? profile.weightUnit)
+    setWeightUnit(
+      editing.weightUnit ?? weightAtDate(events, editing.date)?.unit ?? 'kg',
+    )
+    setUniforms(editingUniforms)
+    setBirthYear(profile.birthYear?.toString() ?? '')
+    setSex(profile.sex ?? '')
     setCompetitionName(editing.competitionName ?? '')
     setUniform(editingUniform)
     setAgeDivision(editing.ageDivision ?? suggested?.age ?? '')
@@ -100,9 +130,24 @@ export function EventForm({
 
   useEffect(() => {
     if (editing) return
-    setWeightUnit(profile.weightUnit)
-    setUniform(profile.uniforms[0])
-  }, [editing, profile.uniforms, profile.weightUnit])
+    setBirthYear(profile.birthYear?.toString() ?? '')
+    setSex(profile.sex ?? '')
+  }, [editing, profile.birthYear, profile.sex])
+
+  useEffect(() => {
+    if (editing) return
+    if (type === 'weight' || isFirstStart) {
+      setWeightUnit(weightAtDate(events, date)?.unit ?? 'kg')
+    }
+    if (type === 'uniform' || isFirstStart) {
+      setUniforms(uniformsAtDate(events, date))
+    }
+  }, [date, editing, events, isFirstStart, type])
+
+  useEffect(() => {
+    if (type !== 'competition' || editing) return
+    setUniform(uniformsAtDate(events, date)[0])
+  }, [date, editing, events, type])
 
   useEffect(() => {
     if (type !== 'competition' || editing) return
@@ -127,16 +172,42 @@ export function EventForm({
   const canClassify = competitionAgeOptions.length > 0 && !!profile.sex
 
   function reset() {
+    setType('')
+    setSchool('')
+    setBelt('blue')
+    setStripe(1)
     setNotes('')
     setWeight('')
+    setWeightUnit(weightAtDate(events, date)?.unit ?? 'kg')
+    setUniforms(uniformsAtDate(events, date))
     setCompetitionName('')
+    setUniform(uniformsAtDate(events, date)[0])
+    setAgeDivision('')
+    setWeightDivision('')
+    setResult('gold')
+    setWins(0)
     setInstructor('')
     setTitle('')
     setPhoto(null)
   }
 
+  function toggleUniform(selected: Uniform) {
+    if (!uniforms.includes(selected)) {
+      setUniforms(
+        (['gi', 'no-gi'] as const).filter(
+          (uniform) => uniform === selected || uniforms.includes(uniform),
+        ),
+      )
+      return
+    }
+    if (uniforms.length > 1) {
+      setUniforms(uniforms.filter((uniform) => uniform !== selected))
+    }
+  }
+
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
+    if (!type) return
     const event: TimelineEvent = {
       id: editing?.id ?? crypto.randomUUID(),
       type,
@@ -144,12 +215,22 @@ export function EventForm({
       notes: notes.trim() || undefined,
     }
     if (type === 'start' || type === 'school') event.school = school.trim() || undefined
+    if (isFirstStart) {
+      event.weight = weight ? Number(weight) : undefined
+      event.weightUnit = weight ? weightUnit : undefined
+      event.uniforms = uniforms
+      onProfileChange({
+        birthYear: birthYear ? Number(birthYear) : undefined,
+        sex: sex || undefined,
+      })
+    }
     if (type === 'belt') event.belt = belt
     if (type === 'stripe') event.stripe = Math.min(stripe, stripeMax)
     if (type === 'weight') {
       event.weight = Number(weight)
       event.weightUnit = weightUnit
     }
+    if (type === 'uniform') event.uniforms = uniforms
     if (type === 'competition') {
       event.competitionName = competitionName.trim() || undefined
       event.uniform = uniform
@@ -164,27 +245,31 @@ export function EventForm({
     reset()
   }
 
+  function cancelEdit() {
+    reset()
+    onCancelEdit()
+  }
+
   const hasCurrentPhoto = !!editing && !!editingPhotoUrl && photo === null
 
   return (
     <form className="event-form" onSubmit={handleSubmit}>
       <label className="field">
         <span>{t('form.type')}</span>
-        <div className="type-picker" role="radiogroup">
+        <select
+          required
+          value={type}
+          onChange={(e) => setType(e.target.value as EventType)}
+        >
+          <option value="" disabled>
+            {t('form.typePlaceholder')}
+          </option>
           {EVENT_TYPES.map((et) => (
-            <button
-              key={et}
-              type="button"
-              role="radio"
-              aria-checked={type === et}
-              className={`type-option ${type === et ? 'selected' : ''}`}
-              onClick={() => setType(et)}
-            >
-              <span className="type-icon">{EVENT_ICONS[et]}</span>
-              {t(`type.${et}`)}
-            </button>
+            <option key={et} value={et}>
+              {EVENT_ICONS[et]} {t(`type.${et}`)}
+            </option>
           ))}
-        </div>
+        </select>
       </label>
 
       <label className="field">
@@ -198,6 +283,8 @@ export function EventForm({
         />
       </label>
 
+      {type && (
+        <>
       {(type === 'start' || type === 'school') && (
         <label className="field">
           <span>{t('form.school')}</span>
@@ -208,6 +295,37 @@ export function EventForm({
             onChange={(e) => setSchool(e.target.value)}
           />
         </label>
+      )}
+
+      {isFirstStart && (
+        <>
+          <label className="field">
+            <span>{t('profile.birthYear')}</span>
+            <input
+              type="number"
+              required
+              min={1900}
+              max={new Date().getFullYear() - 4}
+              value={birthYear}
+              onChange={(e) => setBirthYear(e.target.value)}
+            />
+            <small className="field-hint">{t('profile.birthYearHint')}</small>
+          </label>
+          <label className="field">
+            <span>{t('profile.sex')}</span>
+            <select
+              required
+              value={sex}
+              onChange={(e) => setSex(e.target.value as Sex)}
+            >
+              <option value="" disabled>
+                {t('profile.sexPlaceholder')}
+              </option>
+              <option value="male">{t('profile.sex.male')}</option>
+              <option value="female">{t('profile.sex.female')}</option>
+            </select>
+          </label>
+        </>
       )}
 
       {type === 'belt' && (
@@ -248,13 +366,13 @@ export function EventForm({
         </label>
       )}
 
-      {type === 'weight' && (
+      {(type === 'weight' || isFirstStart) && (
         <>
           <label className="field">
-            <span>{t('form.weight')}</span>
+            <span>{t(type === 'weight' ? 'form.weight' : 'form.initialWeight')}</span>
             <input
               type="number"
-              required
+              required={type === 'weight'}
               min={0.1}
               step={0.1}
               value={weight}
@@ -262,7 +380,7 @@ export function EventForm({
             />
           </label>
           <label className="field">
-            <span>{t('profile.weightUnit')}</span>
+            <span>{t('form.weightUnit')}</span>
             <select
               value={weightUnit}
               onChange={(e) => setWeightUnit(e.target.value as WeightUnit)}
@@ -273,6 +391,27 @@ export function EventForm({
             <small className="field-hint">{t('form.weightHint')}</small>
           </label>
         </>
+      )}
+
+      {(type === 'uniform' || isFirstStart) && (
+        <label className="field">
+          <span>{t('form.uniforms')}</span>
+          <div className="uniform-picker" role="group">
+            {(['gi', 'no-gi'] as const).map((uniform) => (
+              <button
+                key={uniform}
+                type="button"
+                className={`type-option uniform-option ${
+                  uniforms.includes(uniform) ? 'selected' : ''
+                }`}
+                aria-pressed={uniforms.includes(uniform)}
+                onClick={() => toggleUniform(uniform)}
+              >
+                {t(`division.uniform.${uniform}`)}
+              </button>
+            ))}
+          </div>
+        </label>
       )}
 
       {type === 'competition' && (
@@ -420,9 +559,11 @@ export function EventForm({
         {editing ? t('form.update') : t('form.save')}
       </button>
       {editing && (
-        <button type="button" className="btn-secondary btn-cancel" onClick={onCancelEdit}>
+        <button type="button" className="btn-secondary btn-cancel" onClick={cancelEdit}>
           {t('form.cancel')}
         </button>
+      )}
+        </>
       )}
     </form>
   )
