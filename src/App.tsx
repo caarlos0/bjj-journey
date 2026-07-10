@@ -184,7 +184,7 @@ export default function App() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  async function capture(node: HTMLElement, pixelRatio: number): Promise<string> {
+  async function capture(node: HTMLElement): Promise<string> {
     await document.fonts.ready
     // Make sure every photo is fully decoded before serializing.
     await Promise.all(
@@ -192,7 +192,7 @@ export default function App() {
         img.decode().catch(() => {}),
       ),
     )
-    const options = { pixelRatio, backgroundColor: '#14161a' }
+    const options = { pixelRatio: 1, backgroundColor: '#14161a' }
     // Safari decodes images inside the SVG capture lazily, so the first
     // render(s) come out with blank photos. Warm-up passes are the
     // established workaround; the last pass has everything painted.
@@ -233,7 +233,7 @@ export default function App() {
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
       const node = cardRef.current
       if (node && !cancelled) {
-        await deliverPng(await capture(node, 1))
+        await deliverPng(await capture(node))
       }
       setCardFormat(null)
       setExporting(false)
