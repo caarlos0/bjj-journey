@@ -728,6 +728,11 @@ input[type='number']::-webkit-outer-spin-button {
   font-weight: 600;
   margin: 4px;
   padding: 4px 12px;
+  /* html-to-image freezes computed widths in its SVG clone; emoji can
+     measure wider there and wrap the count onto a second line, which
+     then throws off the baseline of the whole chip row. */
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 .timeline {
