@@ -3,7 +3,7 @@ import { beltsThrough, describeEvent, restartFlags, sortByDate } from '../descri
 import { formatDivision, formatDivisions } from '../divisions'
 import { useI18n } from '../i18n'
 import { EVENT_ICONS, RESULT_ICONS } from '../icons'
-import { computeStats, formatWins, matTime } from '../stats'
+import { computeStats, formatLosses, formatWins, matTime } from '../stats'
 import {
   BELT_STYLES,
   type AgeDivisionChange,
@@ -144,6 +144,7 @@ export const Timeline = forwardRef<HTMLDivElement, TimelineProps>(
                           : '',
                         event.result ? t(`result.${event.result}`) : '',
                         event.wins ? formatWins(event.wins, t) : '',
+                        event.losses ? formatLosses(event.losses, t) : '',
                       ]
                         .filter(Boolean)
                         .join(' · ')}

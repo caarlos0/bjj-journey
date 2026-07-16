@@ -1,5 +1,5 @@
 import { useI18n } from '../i18n'
-import { formatWins, type Stats } from '../stats'
+import { formatLosses, formatWins, type Stats } from '../stats'
 
 // Competition/medal/win chips, shared by the timeline header and the
 // social export cards. Renders nothing without competitions.
@@ -19,6 +19,9 @@ export function StatChips({ stats, className }: { stats: Stats; className: strin
       {stats.bronze > 0 && <span className="stat-chip">🥉 {stats.bronze}</span>}
       {stats.wins > 0 && (
         <span className="stat-chip">✊ {formatWins(stats.wins, t)}</span>
+      )}
+      {stats.losses > 0 && (
+        <span className="stat-chip">🩹 {formatLosses(stats.losses, t)}</span>
       )}
     </div>
   )

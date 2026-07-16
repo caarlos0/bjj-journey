@@ -21,10 +21,16 @@ describe('computeStats', () => {
     expect(stats.competitions).toBe(0)
   })
 
-  it('counts competitions, medals and wins', () => {
+  it('counts competitions, medals, wins and losses', () => {
     const stats = computeStats([
       ev({ type: 'competition', date: '2021-01-01', result: 'gold', wins: 3 }),
-      ev({ type: 'competition', date: '2022-01-01', result: 'silver', wins: 2 }),
+      ev({
+        type: 'competition',
+        date: '2022-01-01',
+        result: 'silver',
+        wins: 2,
+        losses: 1,
+      }),
       ev({ type: 'competition', date: '2023-01-01', result: 'participated' }),
     ])
     expect(stats.competitions).toBe(3)
@@ -32,6 +38,7 @@ describe('computeStats', () => {
     expect(stats.silver).toBe(1)
     expect(stats.bronze).toBe(0)
     expect(stats.wins).toBe(5)
+    expect(stats.losses).toBe(1)
   })
 
   it('tracks current belt and stripes, resetting stripes on promotion', () => {

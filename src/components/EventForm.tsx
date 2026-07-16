@@ -83,6 +83,7 @@ export function EventForm({
   const [weightDivision, setWeightDivision] = useState<WeightDivision | ''>('')
   const [result, setResult] = useState<CompetitionResult>('gold')
   const [wins, setWins] = useState(0)
+  const [losses, setLosses] = useState(0)
   const [instructor, setInstructor] = useState('')
   const [title, setTitle] = useState('')
   const [notes, setNotes] = useState('')
@@ -122,6 +123,7 @@ export function EventForm({
     setWeightDivision(editing.weightDivision ?? suggested?.weight ?? '')
     setResult(editing.result ?? 'gold')
     setWins(editing.wins ?? 0)
+    setLosses(editing.losses ?? 0)
     setInstructor(editing.instructor ?? '')
     setTitle(editing.title ?? '')
     setNotes(editing.notes ?? '')
@@ -186,6 +188,7 @@ export function EventForm({
     setWeightDivision('')
     setResult('gold')
     setWins(0)
+    setLosses(0)
     setInstructor('')
     setTitle('')
     setPhoto(null)
@@ -238,6 +241,7 @@ export function EventForm({
       event.weightDivision = weightDivision || undefined
       event.result = result
       event.wins = wins > 0 ? wins : undefined
+      event.losses = losses > 0 ? losses : undefined
     }
     if (type === 'seminar') event.instructor = instructor.trim() || undefined
     if (type === 'milestone') event.title = title.trim() || undefined
@@ -495,6 +499,16 @@ export function EventForm({
               max={99}
               value={wins}
               onChange={(e) => setWins(Number(e.target.value))}
+            />
+          </label>
+          <label className="field">
+            <span>{t('form.losses')}</span>
+            <input
+              type="number"
+              min={0}
+              max={99}
+              value={losses}
+              onChange={(e) => setLosses(Number(e.target.value))}
             />
           </label>
         </>

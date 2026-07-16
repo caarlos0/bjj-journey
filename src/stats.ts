@@ -47,12 +47,17 @@ export function formatWins(wins: number, t: T): string {
   return wins === 1 ? t('tl.win') : t('tl.wins', { n: wins })
 }
 
+export function formatLosses(losses: number, t: T): string {
+  return losses === 1 ? t('tl.loss') : t('tl.losses', { n: losses })
+}
+
 export interface Stats {
   competitions: number
   gold: number
   silver: number
   bronze: number
   wins: number
+  losses: number
   currentBelt: BeltColor
   currentStripes: number
 }
@@ -64,6 +69,7 @@ export function computeStats(events: TimelineEvent[]): Stats {
     silver: 0,
     bronze: 0,
     wins: 0,
+    losses: 0,
     currentBelt: 'white',
     currentStripes: 0,
   }
@@ -82,6 +88,7 @@ export function computeStats(events: TimelineEvent[]): Stats {
       case 'competition':
         stats.competitions++
         stats.wins += e.wins ?? 0
+        stats.losses += e.losses ?? 0
         if (e.result === 'gold') stats.gold++
         if (e.result === 'silver') stats.silver++
         if (e.result === 'bronze') stats.bronze++

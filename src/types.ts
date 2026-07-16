@@ -102,6 +102,7 @@ export interface TimelineEvent {
   competitionName?: string
   result?: CompetitionResult
   wins?: number
+  losses?: number
   weight?: number
   weightUnit?: WeightUnit
   uniform?: Uniform
