@@ -1,10 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
-  initProfiles,
+  initProfile,
   loadEvents,
   loadName,
   loadProfile,
-  removeProfileData,
   saveEvents,
   saveName,
   saveProfile,
@@ -24,27 +23,42 @@ const events: TimelineEvent[] = [
   { id: '1', type: 'start', date: '2019-03-11', school: 'Gracie Barra' },
 ]
 
-describe('initProfiles', () => {
-  it('creates a first profile when none exist', () => {
-    const { profiles, active } = initProfiles()
-    expect(profiles).toHaveLength(1)
-    expect(active).toBe(profiles[0])
+describe('initProfile', () => {
+  it('creates a profile when none exist', () => {
+    const id = initProfile()
+    expect(id).toBeTruthy()
+    expect(localStorage.getItem('bjjourney:profiles')).toBe(
+      JSON.stringify([id]),
+    )
   })
 
   it('is idempotent', () => {
-    const first = initProfiles()
-    const second = initProfiles()
-    expect(second).toEqual(first)
+    const first = initProfile()
+    const second = initProfile()
+    expect(second).toBe(first)
   })
 
   it('migrates legacy single-profile data', () => {
     localStorage.setItem('bjjourney:events', JSON.stringify(events))
     localStorage.setItem('bjjourney:name', 'Carlos')
-    const { active } = initProfiles()
-    expect(loadEvents(active)).toEqual(events)
-    expect(loadName(active)).toBe('Carlos')
+    const id = initProfile()
+    expect(loadEvents(id)).toEqual(events)
+    expect(loadName(id)).toBe('Carlos')
     expect(localStorage.getItem('bjjourney:events')).toBeNull()
     expect(localStorage.getItem('bjjourney:name')).toBeNull()
+  })
+
+  it('keeps only the last of multiple profiles', () => {
+    localStorage.setItem('bjjourney:profiles', JSON.stringify(['a', 'b', 'c']))
+    localStorage.setItem('bjjourney:active', 'a')
+    saveEvents('c', events)
+    const id = initProfile()
+    expect(id).toBe('c')
+    expect(localStorage.getItem('bjjourney:profiles')).toBe(
+      JSON.stringify(['c']),
+    )
+    expect(localStorage.getItem('bjjourney:active')).toBeNull()
+    expect(loadEvents(id)).toEqual(events)
   })
 })
 
@@ -62,15 +76,6 @@ describe('per-profile storage', () => {
     expect(loadName('b')).toBe('Kiddo')
     expect(loadProfile('a').birthYear).toBe(1985)
     expect(loadProfile('b')).toEqual({})
-  })
-
-  it('removes profile data', () => {
-    saveEvents('a', events)
-    saveName('a', 'Carlos')
-    removeProfileData('a')
-    expect(loadEvents('a')).toEqual([])
-    expect(loadName('a')).toBe('')
-    expect(loadProfile('a')).toEqual({})
   })
 
   it('survives corrupted json', () => {

@@ -10,47 +10,33 @@ const eventsKey = (profile: string) => `bjjourney:${profile}:events`
 const nameKey = (profile: string) => `bjjourney:${profile}:name`
 const profileKey = (profile: string) => `bjjourney:${profile}:profile`
 
-// Ensures the profile list exists, migrating pre-profile data into the
-// first profile. Idempotent.
-export function initProfiles(): { profiles: string[]; active: string } {
-  let profiles: string[] | null = null
+// Ensures the single profile exists, migrating pre-profile data into
+// it. Older versions supported multiple profiles; only the last one is
+// kept and the others are ignored (their data stays in localStorage but
+// is never shown). Idempotent.
+export function initProfile(): string {
+  let stored: string[] = []
   try {
     const parsed = JSON.parse(localStorage.getItem(PROFILES_KEY) ?? 'null')
-    if (Array.isArray(parsed) && parsed.length > 0) profiles = parsed
+    if (Array.isArray(parsed)) stored = parsed
   } catch {
     // fall through to re-init
   }
-  if (!profiles) {
-    const id = crypto.randomUUID()
+  let id = stored.length > 0 ? stored[stored.length - 1] : null
+  if (!id) {
+    id = crypto.randomUUID()
     const legacyEvents = localStorage.getItem(LEGACY_EVENTS_KEY)
     const legacyName = localStorage.getItem(LEGACY_NAME_KEY)
     if (legacyEvents) localStorage.setItem(eventsKey(id), legacyEvents)
     if (legacyName) localStorage.setItem(nameKey(id), legacyName)
     localStorage.removeItem(LEGACY_EVENTS_KEY)
     localStorage.removeItem(LEGACY_NAME_KEY)
-    profiles = [id]
-    localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles))
   }
-  let active = localStorage.getItem(ACTIVE_KEY)
-  if (!active || !profiles.includes(active)) {
-    active = profiles[0]
-    localStorage.setItem(ACTIVE_KEY, active)
+  if (stored.length !== 1) {
+    localStorage.setItem(PROFILES_KEY, JSON.stringify([id]))
   }
-  return { profiles, active }
-}
-
-export function saveProfiles(profiles: string[]) {
-  localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles))
-}
-
-export function setActiveProfile(id: string) {
-  localStorage.setItem(ACTIVE_KEY, id)
-}
-
-export function removeProfileData(profile: string) {
-  localStorage.removeItem(eventsKey(profile))
-  localStorage.removeItem(nameKey(profile))
-  localStorage.removeItem(profileKey(profile))
+  localStorage.removeItem(ACTIVE_KEY)
+  return id
 }
 
 export function loadEvents(profile: string): TimelineEvent[] {

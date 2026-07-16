@@ -12,11 +12,6 @@ const dict = {
   'en-US': {
     'app.title': 'BJJ Journey',
     'app.tagline': 'Your jiu-jitsu story, one roll at a time',
-    'profile.title': 'Profile',
-    'profile.add': 'New profile',
-    'profile.delete': 'Delete profile',
-    'profile.confirmDelete': 'Delete this profile and all its events?',
-    'profile.default': 'Profile',
     'profile.birthYear': 'Birth year',
     'profile.birthYearHint': 'IBJJF divisions use the year, not the birthday.',
     'profile.sex': 'IBJJF category',
@@ -187,11 +182,6 @@ const dict = {
   'pt-BR': {
     'app.title': 'BJJ Journey',
     'app.tagline': 'Sua história no jiu-jitsu, um rola de cada vez',
-    'profile.title': 'Perfil',
-    'profile.add': 'Novo perfil',
-    'profile.delete': 'Excluir perfil',
-    'profile.confirmDelete': 'Excluir este perfil e todos os seus eventos?',
-    'profile.default': 'Perfil',
     'profile.birthYear': 'Ano de nascimento',
     'profile.birthYearHint': 'A IBJJF usa o ano, não a data do aniversário.',
     'profile.sex': 'Categoria IBJJF',
