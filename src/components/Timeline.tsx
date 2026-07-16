@@ -45,6 +45,15 @@ export const Timeline = forwardRef<HTMLDivElement, TimelineProps>(
     const belts = useMemo(() => beltsThrough(sorted), [sorted])
     const restarts = useMemo(() => restartFlags(sorted), [sorted])
     const stats = useMemo(() => computeStats(events), [events])
+    // Belts/restarts are derived chronologically; the list itself shows
+    // the most recent event first.
+    const newestFirst = useMemo(
+      () =>
+        sorted
+          .map((event, i) => ({ event, belt: belts[i], restart: restarts[i] }))
+          .reverse(),
+      [sorted, belts, restarts],
+    )
 
     if (sorted.length === 0) {
       return (
@@ -87,8 +96,7 @@ export const Timeline = forwardRef<HTMLDivElement, TimelineProps>(
         </header>
 
         <ol className="timeline">
-          {sorted.map((event, i) => {
-            const belt = belts[i]
+          {newestFirst.map(({ event, belt, restart }) => {
             const competitionDivision =
               event.type === 'competition' && event.ageDivision && event.uniform
                 ? {
@@ -120,7 +128,7 @@ export const Timeline = forwardRef<HTMLDivElement, TimelineProps>(
                         ? RESULT_ICONS[event.result]
                         : EVENT_ICONS[event.type]}
                     </span>
-                    {describeEvent(event, belt, t, restarts[i])}
+                    {describeEvent(event, belt, t, restart)}
                   </p>
                   {event.type === 'belt' && event.belt && (
                     <Belt color={event.belt} />
