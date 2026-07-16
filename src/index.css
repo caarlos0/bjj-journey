@@ -68,6 +68,11 @@ body {
   color: var(--text);
 }
 
+.app-title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
 /* Brazilian flag colors, brightened for the dark background */
 .brand-green {
   color: #35b558;

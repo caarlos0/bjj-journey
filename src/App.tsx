@@ -256,9 +256,18 @@ export default function App() {
       <header className="app-header">
         <div className="app-title">
           <h1>
-            <span className="brand-green">B</span>
-            <span className="brand-yellow">J</span>
-            <span className="brand-blue">J</span> Journey
+            <a
+              className="app-title-link"
+              href="/"
+              onClick={(e) => {
+                e.preventDefault()
+                closeShared()
+              }}
+            >
+              <span className="brand-green">B</span>
+              <span className="brand-yellow">J</span>
+              <span className="brand-blue">J</span> Journey
+            </a>
           </h1>
           <p>{t('app.tagline')}</p>
         </div>
